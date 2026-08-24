@@ -18,6 +18,10 @@ you three optional questions near the end.
 
 Re-running it is safe: anything already installed is left alone.
 
+## Manual
+
+Full setup and operating manual: [docs/MANUAL.md](docs/MANUAL.md)
+
 ## Using it
 
 ```
