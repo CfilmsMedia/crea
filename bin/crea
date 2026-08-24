@@ -7,7 +7,15 @@ import subprocess
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+# The audio stack (sounddevice) lives in CREA's venv, not in system python.
+# Re-exec into it once, so `crea listen` works no matter how it was invoked.
+_VENV = ROOT / ".venv/bin/python3"
+if _VENV.exists() and not sys.executable.startswith(str(ROOT / ".venv")):
+    import os
+    os.execv(str(_VENV), [str(_VENV), __file__, *sys.argv[1:]])
 
 from core.config import load
 from core.vault import Vault

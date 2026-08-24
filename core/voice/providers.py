@@ -39,14 +39,26 @@ class TTSProvider(ABC):
         """Real reachability check. Never a hardcoded ok."""
 
 
+def say_name(text: str, spelling: str = "Cree-ah") -> str:
+    """Rewrite CREA to its phonetic spelling before synthesis.
+
+    Read literally, every TTS engine says "cray". The name is "kree-ah", so the
+    assistant would otherwise mispronounce itself every time it spoke.
+    """
+    import re
+    return re.sub(r"\bCREA\b", spelling, text, flags=re.IGNORECASE)
+
+
 class PocketTTS(TTSProvider):
     """Local Pocket TTS daemon. Free, offline, no per-word cost."""
 
-    def __init__(self, endpoint: str, voice: str):
+    def __init__(self, endpoint: str, voice: str, name_spelling: str = "Cree-ah"):
         self.endpoint = endpoint
         self.voice = voice
+        self.name_spelling = name_spelling
 
     def speak(self, text: str) -> bytes:
+        text = say_name(text, self.name_spelling)
         body = json.dumps({"text": text, "voice": self.voice}).encode()
         req = urllib.request.Request(
             self.endpoint, data=body, headers={"Content-Type": "application/json"}
@@ -97,6 +109,16 @@ class ElevenLabsTTS(TTSProvider):
 
 # ---------------------------------------------------------------- STT
 
+# whisper.cpp emits bracketed markers for non-speech ([BLANK_AUDIO], [MUSIC],
+# (wind blowing)...). They are not words, and treating them as a command sends
+# CREA off to answer a question nobody asked.
+_MARKER = __import__("re").compile(r"[\[(][^\])]*[\])]")
+
+
+def _clean_transcript(text: str) -> str:
+    return _MARKER.sub("", text).strip(" .,-\n\t")
+
+
 class STTProvider(ABC):
     @abstractmethod
     def transcribe(self, wav_path: Path) -> str: ...
@@ -108,30 +130,59 @@ class STTProvider(ABC):
 class WhisperCpp(STTProvider):
     """Local whisper.cpp. Free, offline — audio never leaves the machine."""
 
-    def __init__(self, model: str):
-        self.model = model
+    def __init__(self, model: str, models_dir: Path | None = None,
+                 prompt: str | None = None):
+        # "CREA" is not a dictionary word, so whisper renders it as "Paycray",
+        # "Korea", "Career"... Seeding the decoder with an initial prompt
+        # containing the name fixes this at the source rather than trying to
+        # pattern-match the damage afterwards.
+        self.prompt = prompt
+        # Config names a model ("base.en"); whisper.cpp needs a path to a .bin.
+        # Accept either, so a readable config does not become a runtime failure.
+        self.model = self._resolve(model, models_dir)
         self.binary = shutil.which("whisper-cli") or shutil.which("whisper-cpp")
+
+    @staticmethod
+    def _resolve(model: str, models_dir: Path | None) -> str:
+        p = Path(model).expanduser()
+        if p.suffix == ".bin":
+            return str(p)
+        d = models_dir or (Path(__file__).resolve().parents[2] / "var/models")
+        return str(Path(d) / f"ggml-{model}.bin")
+
+    @property
+    def model_present(self) -> bool:
+        return Path(self.model).exists()
 
     def transcribe(self, wav_path: Path) -> str:
         if not self.binary:
             raise VoiceError(
                 "whisper.cpp not installed. Install with: brew install whisper-cpp"
             )
+        if not self.model_present:
+            raise VoiceError(
+                f"speech model missing at {self.model}. "
+                "Re-run the installer, or: crea fetch-model"
+            )
         with tempfile.TemporaryDirectory() as td:
             out = Path(td) / "out"
-            proc = subprocess.run(
-                [self.binary, "-m", self.model, "-f", str(wav_path),
-                 "-otxt", "-of", str(out), "-nt"],
-                capture_output=True, text=True,
-            )
+            cmd = [self.binary, "-m", self.model, "-f", str(wav_path),
+                   "-otxt", "-of", str(out), "-nt"]
+            if self.prompt:
+                cmd += ["--prompt", self.prompt]
+            proc = subprocess.run(cmd, capture_output=True, text=True)
             if proc.returncode != 0:
                 raise VoiceError(f"whisper.cpp failed: {proc.stderr[-400:]}")
             txt = out.with_suffix(".txt")
-            return txt.read_text().strip() if txt.exists() else ""
+            raw = txt.read_text().strip() if txt.exists() else ""
+            return _clean_transcript(raw)
 
     def health(self) -> dict:
-        return {"provider": "whispercpp", "reachable": bool(self.binary),
-                "binary": self.binary}
+        return {"provider": "whispercpp",
+                "reachable": bool(self.binary) and self.model_present,
+                "binary": self.binary,
+                "model": self.model,
+                "model_present": self.model_present}
 
 
 class DeepgramSTT(STTProvider):
@@ -163,7 +214,8 @@ class DeepgramSTT(STTProvider):
 def make_tts(cfg) -> TTSProvider:
     provider = cfg.get("voice.tts.provider")
     if provider == "pocket":
-        return PocketTTS(cfg.get("voice.tts.endpoint"), cfg.get("voice.tts.voice"))
+        return PocketTTS(cfg.get("voice.tts.endpoint"), cfg.get("voice.tts.voice"),
+                         cfg.get("identity._tts_spelling", "Cree-ah"))
     if provider == "elevenlabs":
         return ElevenLabsTTS(cfg.secret("ELEVENLABS_API_KEY"),
                              cfg.get("voice.tts.paid_alternative.voice_id", None))
@@ -173,7 +225,9 @@ def make_tts(cfg) -> TTSProvider:
 def make_stt(cfg) -> STTProvider:
     provider = cfg.get("voice.stt.provider")
     if provider == "whispercpp":
-        return WhisperCpp(cfg.get("voice.stt.model"))
+        return WhisperCpp(cfg.get("voice.stt.model"),
+                          Path(cfg.get("paths.root")) / "var/models",
+                          prompt=cfg.get("voice.stt.prompt", None))
     if provider == "deepgram":
         return DeepgramSTT(cfg.secret("DEEPGRAM_API_KEY"),
                            cfg.get("voice.stt.paid_alternative.model", "nova-3"))

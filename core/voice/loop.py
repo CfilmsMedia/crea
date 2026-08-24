@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 from ..brain import make_brain
@@ -58,6 +59,7 @@ def answer(cfg, vault: Vault, question: str, speak: bool = True) -> str:
 
 def run(cfg, vault: Vault) -> None:
     """The always-on loop. Ctrl-C to stop."""
+    from .wake import WakeError
     stt = make_stt(cfg)
     tts = make_tts(cfg)
     wake = make_wake(cfg, stt)
@@ -88,5 +90,11 @@ def run(cfg, vault: Vault) -> None:
         except KeyboardInterrupt:
             print("\n[crea] stopped")
             return
+        except WakeError as e:
+            # A misconfigured or missing wake model will not fix itself. Spinning
+            # on it just fills the log with the same line hundreds of times.
+            print(f"[crea] cannot listen: {e}")
+            return
         except Exception as e:
             print(f"[crea] error: {e}")
+            time.sleep(2)          # never hot-loop on a repeating fault

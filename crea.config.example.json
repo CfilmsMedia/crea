@@ -6,7 +6,10 @@
     "principal": "Connell Saputra",
     "business": "Cfilms",
     "timezone": "Australia/Sydney",
-    "locale": "en-AU"
+    "locale": "en-AU",
+    "pronunciation": "KREE-ah",
+    "_tts_spelling": "Cree-ah",
+    "_pronunciation_note": "CREA is said KREE-ah. Text-to-speech reads the raw letters as 'cray', so any spoken line containing the name is rewritten to the phonetic spelling before synthesis. This also matters for the wake word: the speech model was transcribing the mispronounced name as 'Paycray'."
   },
   "paths": {
     "_comment": "Deliberately NOT in iCloud: launchd/cron jobs do not run reliably from an iCloud-synced folder.",
@@ -40,13 +43,16 @@
       "paid_alternative": {
         "provider": "deepgram",
         "model": "nova-3"
-      }
+      },
+      "prompt": "Hey CREA. CREA, pronounced kree-ah, is the assistant for Cfilms, a real estate photography business. Bookings, shoots, agents, invoices.",
+      "_prompt_note": "Seeds the speech decoder so it expects the name CREA. Without this whisper transcribes it as 'Paycray' and the wake word never fires."
     },
     "wake": {
-      "provider": "openwakeword",
+      "provider": "vad-whisper",
       "model_path": "~/crea/var/models/hey_crea.onnx",
       "threshold": 0.6,
-      "_note": "Wake detection is fully on-device. No audio leaves the machine until the phrase fires."
+      "_note": "Wake detection is fully on-device. No audio leaves the machine until the phrase fires.",
+      "_provider_note": "vad-whisper works on day one with no training. Switch to 'openwakeword' only once a trained hey_crea.onnx exists at model_path \u2014 it is lower CPU but needs that file."
     }
   },
   "integrations": {
