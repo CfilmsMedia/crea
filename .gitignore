@@ -1,5 +1,6 @@
 .venv/
 tts/.venv/
+tts/.venv/
 var/
 vault/
 crea.config.json
