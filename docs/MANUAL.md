@@ -3,6 +3,15 @@
 **Cfilms Real Estate Adviser.** Prepared for Connell Saputra.
 Supersedes the plan of 17 August 2026.
 
+> ### Every number in this document is a placeholder
+> The jobs, clients, addresses, dollar figures and dates throughout — Aisha
+> Rahman, $7,170 outstanding, the Baulkham Hills shoot — are **invented test
+> data**, so the system has something realistic to run against before your real
+> accounts are connected. None of it refers to a real client, shoot, or amount.
+>
+> The only figures that are **measured rather than invented** are the performance
+> numbers in §4 and the costs in §4. Those were timed on real hardware.
+
 A presentation copy of this document lives at
 <https://claude.ai/code/artifact/6d9a6d2f-3a0f-4358-b866-e2141be5bdb6>.
 **This file is the source of truth** — it sits beside `install.sh`, so it cannot
@@ -41,7 +50,48 @@ and CREA still installs and still talks to you.
 **Safe to re-run.** Anything already installed is left alone, and your settings
 file is never overwritten.
 
-## 2. The moment it finishes
+## 2. Talking to it
+
+### It's pronounced *KREE-ah*
+
+Not "cray". The speech recognition is tuned for that pronunciation, and CREA says
+its own name that way too. Say it "cray" and it will usually still catch you, but
+"kree-ah" is what it listens for.
+
+### macOS will ask for the microphone
+
+The first time CREA listens, macOS asks permission to use the microphone.
+**Say yes.** If you miss it or hit Don't Allow, CREA sits there hearing nothing
+forever — the most common reason a setup like this looks broken when it isn't.
+Fix it later under **System Settings → Privacy & Security → Microphone**.
+
+### Just talk
+
+```
+"Hey CREA, what have I got on today?"
+"Hey CREA, how much am I owed?"
+"Hey CREA, mark the Castle Hill job as shot."
+```
+
+Say the name, wait for the short "Yep?", then say what you want. It listens
+continuously; nothing is transmitted until you've said its name, and the
+recording is discarded once understood.
+
+### If it doesn't hear you
+
+| What's happening | What to do |
+|---|---|
+| No response at all | `crea status` — reports honestly which part is down |
+| Never wakes up | Check mic permission. Then check the input device — a connected iPhone or headset can quietly steal it |
+| Wakes at the wrong times | Tuned to accept near-misses rather than miss you. Say the word and I'll tighten it |
+| Hears you but answers oddly | Expected early. It only knows the vault — connecting Acuity and Google makes answers real |
+
+### You never have to use your voice
+
+Everything CREA does by voice it also does by typing, and the vault is plain
+documents you can edit in Obsidian. Voice is the convenient path, not the only one.
+
+## 3. The moment it finishes
 
 CREA is already listening and already restarts on reboot. Try:
 
@@ -58,7 +108,7 @@ crea connect         # add an account you skipped
 Open Obsidian and your job vault is there — every shoot, client and note as a
 plain document you can read and edit. Change something and CREA knows immediately.
 
-## 3. The screens
+## 4. The screens
 
 Seven panels, mapping onto the four skill groups in your plan:
 
@@ -75,7 +125,7 @@ Seven panels, mapping onto the four skill groups in your plan:
 Live mockup with the real voice:
 <https://claude.ai/code/artifact/c36157f1-2dba-4de3-84b1-9f005d70653e>
 
-## 4. What runs, measured
+## 5. What runs, measured
 
 Benchmarked on an Apple M1 / 8 GB — deliberately the worst machine this will
 ever run on. Your Mac Mini will be faster.
@@ -87,7 +137,7 @@ ever run on. Your Mac Mini will be faster.
 | Voice cost | **$0** — runs offline on the machine |
 | Running cost | **$0–15/mo** (vs $25–100 originally quoted) |
 
-## 5. Hardware
+## 6. Hardware
 
 **16 GB of memory is the floor.** This is the one specification that decides
 whether CREA feels instant or frustrating — 8 GB genuinely is not enough to hold
@@ -97,7 +147,7 @@ less than 16 GB.
 - Refurbished M1 Mac Mini — fine, *if* it's 16 GB
 - New base M4 Mac Mini — the safer buy
 
-## 6. WhatsApp
+## 7. WhatsApp
 
 `hermes whatsapp` pairs by QR code, like WhatsApp Web. **Your number stays a
 normal WhatsApp number** — no migration, no lost chat history.
@@ -110,7 +160,7 @@ held up to a month. Not worth it for a business whose bookings arrive by WhatsAp
 don't formally permit it and there's a small risk of a number being restricted.
 Widely used, rarely a problem — but if you'd rather not, use a second SIM for CREA.
 
-## 7. Call recording — the one legal condition
+## 8. Call recording — the one legal condition
 
 NSW requires **all parties** to consent. The Surveillance Devices Act 2007 has a
 narrow "lawful interests" exception, but *"so I get the booking details right"* is
@@ -135,7 +185,7 @@ doesn't play, nothing is recorded.
 **This is not legal advice.** Have the wording checked by someone qualified before
 switching it on. Every other capability you can enable at your own discretion.
 
-## 8. The card pipeline
+## 9. The card pipeline
 
 Detect the card, copy everything, split into shoots on a time gap, upload each to
 Drive, push to Higgsfield, tell Narendra.
@@ -152,25 +202,25 @@ client and a reputation. CREA verifies every copy and then *tells you* it's safe
 Once you've watched it get that right a dozen times, move it to `"ask"` — your
 call to make later, not a default to inherit now.
 
-## 9. Build order
+## 10. Build order
 
 | # | Phase | Time | Status |
 |---|---|---|---|
 | 1 | Core loop — voice, vault, brain | — | **Done** |
-| 2 | "Hey CREA" wake word | ½ day | Built, untested |
+| 2 | "Hey CREA" wake word | — | **Done** — verified from a real mic |
 | 3 | Acuity + calendar | ½ day | |
 | 4 | Calls + WhatsApp | 2 days | |
 | 5 | Card → Drive → Higgsfield | 2–4 days | |
-| 6 | Job dashboard + invoicing | 1–2 days | |
+| 6 | Job dashboard, invoicing, booking agent | 1–2 days | |
 | 7 | Phone access (iPhone Shortcut + Tailscale) | 2–3 days | |
-| 8 | Daily briefing | ½ day | |
-| 9 | Reminders + expenses | 1 day | |
-| 10 | Uni notes | 1 day | |
-| 11 | The daily board | 2–3 days | |
+| 8 | Personal layer — briefing, reminders, expenses | 1–2 days | |
+| 9 | Uni note-taking from lecture slides | 1 day | |
+| 10 | Lead tracking, client check-ins, content repurposing | 2–3 days | |
+| 11 | The daily agent board | 2–3 days | |
 
 Full system, built steadily: **3–6 weeks part-time.**
 
-## 10. Moving machines
+## 11. Moving machines
 
 Every setting specific to you lives in `crea.config.json`. Moving CREA to a
 different Mac is copying that one file across.
