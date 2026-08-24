@@ -1,0 +1,7 @@
+.venv/
+tts/.venv/
+var/
+vault/
+crea.config.json
+__pycache__/
+*.pyc

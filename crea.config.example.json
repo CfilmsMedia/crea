@@ -1,0 +1,111 @@
+{
+  "_comment": "CREA \u2014 every client-specific name, path, key and preference lives here and NOWHERE else. Transplanting to Connell's Mac Mini means editing this file only.",
+  "identity": {
+    "agent_name": "CREA",
+    "wake_phrase": "hey crea",
+    "principal": "Connell Saputra",
+    "business": "Cfilms",
+    "timezone": "Australia/Sydney",
+    "locale": "en-AU"
+  },
+  "paths": {
+    "_comment": "Deliberately NOT in iCloud: launchd/cron jobs do not run reliably from an iCloud-synced folder.",
+    "root": "~/crea",
+    "vault": "~/crea/vault",
+    "media_staging": "~/crea/var/media",
+    "logs": "~/crea/var/logs"
+  },
+  "brain": {
+    "provider": "hermes",
+    "model": "auto/best-fast",
+    "hermes_provider": "lmstudio",
+    "escalate_to": null,
+    "_escalate_note": "Set to a paid model id to let hard single steps borrow a stronger brain. Null = free only.",
+    "_routing_note": "Hermes points at OmniRoute (localhost:20128/v1), an OpenAI-compatible router over free cloud models. Zero local RAM, zero cost. Swap LM_BASE_URL in ~/.hermes/.env to go local (ollama) or paid (Anthropic)."
+  },
+  "voice": {
+    "_comment": "Free tier is the default and must work standalone. Paid is a drop-in swap of these two strings \u2014 no code change.",
+    "tts": {
+      "provider": "pocket",
+      "endpoint": "http://127.0.0.1:8812/speak",
+      "voice": "alba",
+      "paid_alternative": {
+        "provider": "elevenlabs",
+        "voice_id": null
+      }
+    },
+    "stt": {
+      "provider": "whispercpp",
+      "model": "base.en",
+      "paid_alternative": {
+        "provider": "deepgram",
+        "model": "nova-3"
+      }
+    },
+    "wake": {
+      "provider": "openwakeword",
+      "model_path": "~/crea/var/models/hey_crea.onnx",
+      "threshold": 0.6,
+      "_note": "Wake detection is fully on-device. No audio leaves the machine until the phrase fires."
+    }
+  },
+  "integrations": {
+    "_status_note": "status is a CLAIM until a call succeeds in-transcript. Never trust this field alone.",
+    "acuity": {
+      "enabled": false,
+      "status": "not-wired",
+      "user_id": null,
+      "api_key_env": "ACUITY_API_KEY"
+    },
+    "google": {
+      "enabled": false,
+      "status": "not-wired",
+      "calendar_id": null,
+      "drive_root_folder_id": null
+    },
+    "whatsapp": {
+      "enabled": false,
+      "status": "not-wired",
+      "mode": "baileys-personal",
+      "_mode_note": "baileys-personal pairs by QR like WhatsApp Web. Does NOT migrate the number to the Business Cloud API, so the consumer app and chat history survive. Unofficial client: small ban-risk on the number, disclose to principal."
+    },
+    "higgsfield": {
+      "enabled": false,
+      "status": "not-wired"
+    },
+    "editor_notify": {
+      "enabled": false,
+      "status": "not-wired",
+      "name": "Narendra",
+      "channel": "whatsapp",
+      "handle": null
+    }
+  },
+  "call_recording": {
+    "enabled": false,
+    "_legal": "NSW Surveillance Devices Act 2007 s7 requires all-party consent. Disclosure below is played/spoken at call start to establish consent before any audio is retained. Jurisdiction is config, not code \u2014 do not ship this to another state without review.",
+    "jurisdiction": "NSW-AU",
+    "require_disclosure": true,
+    "disclosure_text": "Just so you know, I record calls so I get the booking details right.",
+    "retain_audio": false,
+    "_retain_note": "false = transcribe then discard audio. Keeps the retained artifact to the booking facts only.",
+    "abort_if_disclosure_fails": true
+  },
+  "media_pipeline": {
+    "enabled": false,
+    "shoot_gap_minutes": 90,
+    "_gap_note": "A break longer than this between shot timestamps starts a new shoot.",
+    "verify_copies": true,
+    "format_card": "never",
+    "_format_note": "never | ask | auto. Ships as 'never'. The card is the only irreplaceable copy until Drive confirms; auto-format is how you lose a client's shoot."
+  },
+  "safety": {
+    "confirm_before_send": true,
+    "confirm_before_delete": true,
+    "confirm_before_spend": true,
+    "quiet_hours": {
+      "start": "21:30",
+      "end": "06:30"
+    }
+  }
+}

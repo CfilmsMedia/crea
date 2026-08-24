@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""CREA command line."""
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from core.config import load
+from core.vault import Vault
+
+USAGE = """crea <command>
+
+  status              honest health of every component
+  init                create the vault skeleton
+  fixtures            seed synthetic Cfilms demo data
+  dashboard           regenerate the vault dashboard
+  ask "<question>"    one turn, spoken aloud
+  say "<text>"        speak a line (voice check)
+  listen              run the always-on wake-word loop
+  voice start|stop    manage the local TTS daemon
+"""
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) < 2 or argv[1] in ("-h", "--help", "help"):
+        print(USAGE)
+        return 0
+
+    cfg = load()
+    vault = Vault(cfg.path("paths.vault"))
+    cmd = argv[1]
+
+    if cmd == "status":
+        from core.brain import make_brain
+        from core.voice.providers import make_stt, make_tts
+        out = {"agent": cfg.get("identity.agent_name"),
+               "vault": str(vault.root),
+               "jobs_in_vault": len(vault.jobs()) if vault.root.exists() else 0}
+        for name, fn in (("tts", lambda: make_tts(cfg).health()),
+                         ("stt", lambda: make_stt(cfg).health()),
+                         ("brain", lambda: make_brain(cfg).health())):
+            try:
+                out[name] = fn()
+            except Exception as e:
+                out[name] = {"reachable": False, "error": str(e)}
+        out["integrations"] = {
+            k: v.get("status") for k, v in cfg.get("integrations").items()
+            if isinstance(v, dict)
+        }
+        print(json.dumps(out, indent=2))
+        return 0
+
+    if cmd == "init":
+        vault.init(); vault.render_dashboard()
+        print(f"vault ready at {vault.root}")
+        return 0
+
+    if cmd == "fixtures":
+        from core.fixtures import build
+        print(json.dumps(build(vault), indent=2))
+        return 0
+
+    if cmd == "dashboard":
+        print(vault.render_dashboard())
+        return 0
+
+    if cmd == "say":
+        from core.voice.loop import play
+        from core.voice.providers import make_tts
+        play(make_tts(cfg).speak(" ".join(argv[2:]) or "CREA online."))
+        return 0
+
+    if cmd == "ask":
+        from core.voice.loop import answer
+        print(answer(cfg, vault, " ".join(argv[2:])))
+        return 0
+
+    if cmd == "listen":
+        from core.voice.loop import run
+        run(cfg, vault)
+        return 0
+
+    if cmd == "voice":
+        tts_dir = Path.home() / ".claude/odyssey/tts"
+        if argv[2:3] == ["start"]:
+            subprocess.Popen(
+                [str(tts_dir / ".venv/bin/python"), str(tts_dir / "server.py")],
+                stdout=open(cfg.path("paths.logs") / "voice.log", "a"),
+                stderr=subprocess.STDOUT)
+            print("voice daemon starting")
+        elif argv[2:3] == ["stop"]:
+            subprocess.run(["pkill", "-f", "tts/server.py"])
+            print("voice daemon stopped")
+        else:
+            print("crea voice start|stop")
+        return 0
+
+    print(f"unknown command: {cmd}\n\n{USAGE}")
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv))
