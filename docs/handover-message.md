@@ -18,10 +18,10 @@ working. Here's everything you need.
 **THE THREE LINKS**
 
 Manual — what it does, what it costs, how to set it up
-https://claude.ai/code/artifact/6d9a6d2f-3a0f-4358-b866-e2141be5bdb6
+https://skw-fuj.github.io/crea/
 
 Interface — click the orange circle and it talks to you
-https://claude.ai/code/artifact/c36157f1-2dba-4de3-84b1-9f005d70653e
+https://skw-fuj.github.io/crea/shell/
 
 Code — all of it, open, yours
 https://github.com/skw-fuj/crea
@@ -171,8 +171,8 @@ Tris
 
 > Hey mate, CREA's done — everything from the August plan, built and working.
 >
-> Manual: https://claude.ai/code/artifact/6d9a6d2f-3a0f-4358-b866-e2141be5bdb6
-> Interface (tap the orange circle, it talks): https://claude.ai/code/artifact/c36157f1-2dba-4de3-84b1-9f005d70653e
+> Manual: https://skw-fuj.github.io/crea/
+> Interface (tap the orange circle, it talks): https://skw-fuj.github.io/crea/shell/
 > Code: https://github.com/skw-fuj/crea
 >
 > To install: plug the Mini in, open Terminal, paste this one line, walk away for

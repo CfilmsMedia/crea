@@ -16,8 +16,8 @@ your cards, and keeps the admin off your plate.
 > The only figures that are **measured rather than invented** are the performance
 > numbers in §1 and the costs in §10. Those were timed on real hardware.
 
-**Presentation copy:** <https://claude.ai/code/artifact/6d9a6d2f-3a0f-4358-b866-e2141be5bdb6>
-**Interface mockup:** <https://claude.ai/code/artifact/c36157f1-2dba-4de3-84b1-9f005d70653e>
+**Presentation copy:** <https://skw-fuj.github.io/crea/>
+**Interface mockup:** <https://skw-fuj.github.io/crea/shell/>
 **Code:** <https://github.com/skw-fuj/crea>
 
 *This file is the source of truth — it sits beside `install.sh` and cannot drift
