@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from .base import Skill, SkillResult
+from ..clock import now as _now
 
 
 class DailyBriefing(Skill):
@@ -27,7 +28,7 @@ class DailyBriefing(Skill):
     phrases = ("morning brief", "whats on today", "brief me")
 
     def run(self, speak: bool = True, **kw) -> SkillResult:
-        now = datetime.now()
+        now = _now(self.cfg)
         jobs = self.vault.jobs()
 
         today = [j for j in jobs
@@ -128,7 +129,7 @@ class Reminders(Skill):
 
     def due(self) -> list[dict]:
         out = []
-        today = datetime.now().date()
+        today = _now(self.cfg).date()
         for r in self._all():
             if r["done"]:
                 continue
@@ -165,7 +166,7 @@ class Reminders(Skill):
         low = text.lower()
         what = re.sub(r"^(remind me( to| about)?|don'?t let me forget( to| about)?)\s*",
                       "", low).strip()
-        now = datetime.now()
+        now = _now()
         when = None
         if "tomorrow" in low:
             when = now + timedelta(days=1)
@@ -243,7 +244,7 @@ class UniNotes(Skill):
         out = folder / f"{p.stem}.md"
         out.write_text("\n".join([
             "---", "type: lecture-notes", f"source: {p.name}",
-            f"subject: {subject or 'General'}", f"date: {datetime.now().date()}",
+            f"subject: {subject or 'General'}", f"date: {_now().date()}",
             "tags: [\"uni/notes\"]", "---", "", f"# {p.stem}", "", notes, "",
             "Part of [[CREA]]"]))
 

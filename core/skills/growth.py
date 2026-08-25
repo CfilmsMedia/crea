@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from .base import Skill, SkillResult
+from ..clock import now as _now
 
 
 class ClientCheckins(Skill):
@@ -24,7 +25,7 @@ class ClientCheckins(Skill):
 
     def run(self, weeks: int | None = None, **kw) -> SkillResult:
         weeks = weeks or int(self.cfg.get("growth.cold_after_weeks", 5))
-        cutoff = datetime.now() - timedelta(weeks=weeks)
+        cutoff = _now(self.cfg) - timedelta(weeks=weeks)
         jobs = self.vault.jobs()
 
         last_seen: dict[str, datetime] = {}
@@ -38,7 +39,7 @@ class ClientCheckins(Skill):
             value[c] = value.get(c, 0) + (j.get("fee") or 0)
 
         cold = sorted(
-            ({"client": c, "last": d, "days": (datetime.now() - d).days,
+            ({"client": c, "last": d, "days": (_now(self.cfg) - d).days,
               "value": value.get(c, 0)}
              for c, d in last_seen.items() if d < cutoff),
             key=lambda x: -x["value"])
@@ -100,7 +101,7 @@ class LeadScan(Skill):
             leads=top)
 
     @staticmethod
-    def _score(item: dict) -> tuple[int, str]:
+    def _score(item: dict, _cfg=None) -> tuple[int, str]:
         """Why a listing is an opportunity, in the terms the plan describes."""
         score, why = 0, []
         photos = item.get("photoCount") or item.get("images") or 0
@@ -118,7 +119,7 @@ class LeadScan(Skill):
         listed = item.get("listedDate") or item.get("dateListed")
         if listed:
             try:
-                age = (datetime.now() - datetime.fromisoformat(str(listed)[:19])).days
+                age = (_now() - datetime.fromisoformat(str(listed)[:19])).days
                 if age <= 3:
                     score += 2
                     why.append("listed this week")
@@ -129,10 +130,10 @@ class LeadScan(Skill):
     def _write(self, leads: list[dict]) -> None:
         folder = self.vault.root / "Leads"
         folder.mkdir(exist_ok=True)
-        p = folder / f"{datetime.now():%Y-%m-%d}.md"
-        lines = ["---", "type: leads", f"date: {datetime.now().date()}",
+        p = folder / f"{_now(self.cfg):%Y-%m-%d}.md"
+        lines = ["---", "type: leads", f"date: {_now(self.cfg).date()}",
                  "tags: [\"cfilms/leads\"]", "---", "",
-                 f"# Leads — {datetime.now():%A %d %B}", ""]
+                 f"# Leads — {_now(self.cfg):%A %d %B}", ""]
         for l in leads:
             lines.append(f"- **{l['agent'] or 'Unknown agent'}** — {l['address']}  \n"
                          f"  {l['why']}" + (f"  \n  {l['url']}" if l["url"] else ""))
@@ -237,7 +238,7 @@ class DailyBoard(Skill):
         for j in sorted(stalled, key=lambda x: x.get("shoot_at", ""))[:4]:
             d = datetime.fromisoformat(j["shoot_at"])
             facts.append(f"- {j['_title']} for {j.get('client')}, shot "
-                         f"{(datetime.now()-d).days} days ago, ${j.get('fee') or 0:,.0f}.")
+                         f"{(_now(self.cfg)-d).days} days ago, ${j.get('fee') or 0:,.0f}.")
 
         from ..brain import make_brain
         prompt = ("You are the standing board for this business. Below is today's state. "
@@ -262,10 +263,10 @@ class DailyBoard(Skill):
     def _write(self, verdict: str, facts: list[str]) -> None:
         folder = self.vault.root / "Board"
         folder.mkdir(exist_ok=True)
-        p = folder / f"{datetime.now():%Y-%m-%d}.md"
+        p = folder / f"{_now(self.cfg):%Y-%m-%d}.md"
         p.write_text("\n".join([
-            "---", "type: board", f"date: {datetime.now().date()}",
+            "---", "type: board", f"date: {_now(self.cfg).date()}",
             "tags: [\"cfilms/board\"]", "---", "",
-            f"# Board — {datetime.now():%A %d %B}", "", verdict, "",
+            f"# Board — {_now(self.cfg):%A %d %B}", "", verdict, "",
             "## What it looked at", "", *[f"- {f}" for f in facts], "",
             "Part of [[CREA]]"]))

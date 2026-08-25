@@ -14,6 +14,7 @@ import json
 import re
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, date
+from .clock import now as _now
 from pathlib import Path
 
 # The job lifecycle from the build plan, in order. Index position is the
@@ -116,7 +117,7 @@ class Vault:
 
     def log(self, kind: str, message: str) -> None:
         p = self.root / "Logs" / f"{date.today():%Y-%m}.md"
-        stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+        stamp = _now().strftime("%Y-%m-%d %H:%M")
         with p.open("a") as fh:
             fh.write(f"- `{stamp}` **{kind}** — {message}\n")
 

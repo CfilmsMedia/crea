@@ -19,6 +19,7 @@ from pathlib import Path
 
 from ..vault import Job
 from .base import Skill, SkillResult
+from ..clock import now as _now
 
 # ---------------------------------------------------------------- extraction
 
@@ -41,7 +42,7 @@ def extract_booking(text: str, now: datetime | None = None) -> dict:
     the rest blank rather than inventing a plausible address. A half-filled job
     the principal completes beats a confidently wrong one he doesn't notice.
     """
-    now = now or datetime.now()
+    now = now or _now()
     low = text.lower()
     out: dict = {"address": "", "when": None, "fee": None, "confidence": 0.0}
 
@@ -145,7 +146,7 @@ class WhatsAppIntake(Skill):
     def _park(self, text: str, sender: str, found: dict) -> None:
         folder = self.vault.root / "Bookings"
         folder.mkdir(exist_ok=True)
-        p = folder / f"{datetime.now():%Y-%m-%d-%H%M} unclear.md"
+        p = folder / f"{_now(self.cfg):%Y-%m-%d-%H%M} unclear.md"
         p.write_text("\n".join([
             "---", "type: booking-draft", f"from: {sender}",
             f"confidence: {found['confidence']:.2f}", "tags: [\"cfilms/inbox\"]",
@@ -202,7 +203,7 @@ class CallIntake(Skill):
         if found["confidence"] < 0.5 or not found["when"]:
             folder = self.vault.root / "Bookings"
             folder.mkdir(exist_ok=True)
-            (folder / f"{datetime.now():%Y-%m-%d-%H%M} call.md").write_text(
+            (folder / f"{_now(self.cfg):%Y-%m-%d-%H%M} call.md").write_text(
                 f"---\ntype: call-note\ntags: [\"cfilms/inbox\"]\n---\n\n"
                 f"# Call transcript\n\n{text}\n\nPart of [[CREA]]\n")
             return SkillResult(ok=True, changed=True,

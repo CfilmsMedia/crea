@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 
 from ..vault import Job, STATUSES, slugify
 from .base import Skill, SkillResult
+from ..clock import now as _now
 
 
 class AcuitySync(Skill):
@@ -156,7 +157,7 @@ class BookingAgent(Skill):
         if blocked:
             return blocked
 
-        tomorrow = (datetime.now() + timedelta(days=1)).date()
+        tomorrow = (_now(self.cfg) + timedelta(days=1)).date()
         due = [j for j in self.vault.jobs()
                if j.get("status") == "Booked"
                and datetime.fromisoformat(j["shoot_at"]).date() == tomorrow

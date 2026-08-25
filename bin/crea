@@ -89,6 +89,13 @@ def main(argv: list[str]) -> int:
                 out[name] = fn()
             except Exception as e:
                 out[name] = {"reachable": False, "error": str(e)}
+        from core import clock
+        out["clock"] = {"now": clock.now(cfg).strftime("%Y-%m-%d %H:%M:%S"),
+                        "zone": cfg.get("identity.timezone"),
+                        "abbrev": clock.label(cfg)}
+        drift = clock.drift_warning(cfg)
+        if drift:
+            out["clock"]["warning"] = drift
         out["connectors"] = status_all(cfg)
         skills = _skills(cfg, vault)
         out["skills"] = {"total": len(skills),

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import random
 from datetime import datetime, timedelta
+from .clock import now as _now
 
 from .vault import Job, Vault
 
@@ -49,7 +50,7 @@ SOURCES = ["acuity", "call", "whatsapp", "manual"]
 def build(vault: Vault, n: int = 14, today: datetime | None = None) -> dict:
     """Populate `vault` with a realistic Cfilms pipeline. Returns a summary."""
     rng = random.Random(SEED)
-    now = today or datetime.now().replace(hour=9, minute=0, second=0, microsecond=0)
+    now = today or _now().replace(hour=9, minute=0, second=0, microsecond=0)
 
     vault.init()
     for name, agency, phone, email in AGENTS:

@@ -15,6 +15,7 @@ from ..brain import make_brain
 from ..vault import Vault
 from .providers import make_stt, make_tts
 from .wake import make_wake
+from ..clock import now as _now
 
 
 def vault_context(vault: Vault, limit: int = 6) -> str:
@@ -28,7 +29,7 @@ def vault_context(vault: Vault, limit: int = 6) -> str:
     unpaid = [j for j in jobs if j.get("status") in ("Shot", "Editing", "Invoiced")]
     owed = sum(j.get("fee") or 0 for j in unpaid)
 
-    lines = [f"Today is {datetime.now():%A %d %B %Y}.",
+    lines = [f"Today is {_now():%A %d %B %Y}.",
              f"{len(jobs)} jobs total. ${owed:,.0f} outstanding across {len(unpaid)} unpaid jobs."]
     if upcoming:
         lines.append("Upcoming shoots:")

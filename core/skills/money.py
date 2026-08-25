@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from .base import Skill, SkillResult
+from ..clock import now as _now
 
 
 class Invoicing(Skill):
@@ -43,7 +44,7 @@ class Invoicing(Skill):
         overdue = []
         for j in sent:
             d = datetime.fromisoformat(j["shoot_at"])
-            age = (datetime.now() - d).days
+            age = (_now(self.cfg) - d).days
             if age > terms:
                 overdue.append({"job": j["_title"], "client": j.get("client"),
                                 "amount": j.get("fee"), "days": age})
@@ -76,11 +77,11 @@ class Invoicing(Skill):
             return p
         fee = j.get("fee") or 0
         client = self.vault.client(j.get("client", "")) or {}
-        due = (datetime.now() + timedelta(
+        due = (_now(self.cfg) + timedelta(
             days=int(self.cfg.get("money.payment_terms_days", 14)))).date()
         p.write_text("\n".join([
             "---", "type: invoice", f"number: {num}", f"client: {j.get('client')}",
-            f"amount: {fee}", f"issued: {datetime.now().date()}", f"due: {due}",
+            f"amount: {fee}", f"issued: {_now(self.cfg).date()}", f"due: {due}",
             "status: draft", "tags: [\"cfilms/invoice\"]", "---", "",
             f"# Invoice {num}", "",
             f"**To** {j.get('client')}" + (f", {client.get('agency')}" if client.get("agency") else ""),
@@ -115,7 +116,7 @@ class Expenses(Skill):
             cat = "other"
         folder = self.vault.root / "Expenses"
         folder.mkdir(exist_ok=True)
-        now = datetime.now()
+        now = _now(self.cfg)
         p = folder / f"{now:%Y-%m}.md"
         if not p.exists():
             p.write_text("\n".join([
