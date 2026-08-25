@@ -73,12 +73,26 @@ def head(title: str, blurb: str = "") -> None:
         print(f"  {blurb}")
 
 
+def open_page(url: str, label: str = "") -> None:
+    """Open the exact page the credential lives on.
+
+    Nobody should have to go hunting through a settings menu they have never
+    seen. CREA opens the right page and prints the address as a fallback.
+    """
+    if not url:
+        return
+    print(f"  Opening {label or url}")
+    subprocess.run(["open", url], capture_output=True)
+    print(f"  If it didn't open: {url}\n")
+
+
 # ------------------------------------------------------------------ services
 
 def connect_acuity(cfg) -> bool:
     head("Acuity Scheduling",
-         "In Acuity: Integrations -> API. You need the User ID and the API Key.")
-    uid = ask("User ID")
+         "Left sidebar > Business Settings > Integrations > API > view credentials.")
+    open_page("https://secure.acuityscheduling.com/", "Acuity")
+    uid = ask("User ID (the numeric one)")
     key = ask("API Key", secret=True)
     if not (uid and key):
         print("  skipped.")
@@ -99,8 +113,11 @@ def connect_acuity(cfg) -> bool:
 def connect_google(cfg) -> bool:
     head("Google (Calendar, Drive, Docs)",
          "This opens a browser once so you can approve access.")
-    print("  You need a Google Cloud OAuth client (Desktop app).")
-    print("  If Tris set one up for you, paste those two values here.")
+    print("  You need an OAuth client. In Google Cloud Console:")
+    print("    APIs & Services > Credentials > Create credentials")
+    print("    > OAuth client ID > Application type: Desktop app")
+    print("  If Tris set one up for you already, just paste those two values.\n")
+    open_page("https://console.cloud.google.com/apis/credentials", "Google Cloud Console")
     cid = ask("Client ID")
     csec = ask("Client secret", secret=True)
     if not (cid and csec):
@@ -176,7 +193,8 @@ def connect_whatsapp(cfg) -> bool:
 
 
 def connect_higgsfield(cfg) -> bool:
-    head("Higgsfield", "Paste the API key from your Higgsfield account.")
+    head("Higgsfield", "Paste the API key from your Higgsfield account settings.")
+    open_page("https://higgsfield.ai/", "Higgsfield")
     key = ask("API key", secret=True)
     if not key:
         print("  skipped.")
@@ -194,7 +212,8 @@ def connect_higgsfield(cfg) -> bool:
 
 
 def connect_apify(cfg) -> bool:
-    head("Apify", "Paste your Apify API token (Settings -> Integrations).")
+    head("Apify", "Settings > Integrations > Personal API token.")
+    open_page("https://console.apify.com/settings/integrations", "Apify Console")
     tok = ask("API token", secret=True)
     if not tok:
         print("  skipped.")
@@ -266,8 +285,10 @@ def run(cfg, which: str | None = None) -> int:
     st = status_all(cfg)
     print("\nWhat's connected:\n")
     for name in ("acuity", "google", "whatsapp", "higgsfield", "apify"):
-        s = st.get(name, {})
-        print(f"  {'yes' if s.get('ready') else 'no ':<4} {name}")
+        row = st.get(name, {})
+        mark = "yes" if row.get("ready") else "no "
+        where = "" if row.get("ready") else f"   {row.get('where') or 'pair on your phone'}"
+        print(f"  {mark:<4} {name:<11}{where}")
     print()
 
     if not sys.stdin.isatty():

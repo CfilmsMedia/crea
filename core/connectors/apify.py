@@ -11,7 +11,10 @@ API = "https://api.apify.com/v2"
 
 class Apify(Connector):
     name = "apify"
-    how_to_connect = "Run: crea connect apify  (paste your Apify API token)"
+    how_to_connect = ("Run: crea connect apify  —  console.apify.com > Settings > "
+                      "Integrations > Personal API token")
+    console_url = "https://console.apify.com/settings/integrations"
+    docs_url = "https://docs.apify.com/api/v2/getting-started"
 
     def _token(self) -> str | None:
         return self.cfg.secret(self.conf.get("api_token_env", "APIFY_TOKEN"))

@@ -24,7 +24,11 @@ SCOPES = [
 
 class Google(Connector):
     name = "google"
-    how_to_connect = "Run: crea connect google  (opens a browser to approve access once)"
+    how_to_connect = ("Run: crea connect google  —  opens a browser to approve access once. "
+                      "Needs an OAuth client from console.cloud.google.com > APIs & Services "
+                      "> Credentials > Create credentials > OAuth client ID > Desktop app")
+    console_url = "https://console.cloud.google.com/apis/credentials"
+    docs_url = "https://developers.google.com/identity/protocols/oauth2/native-app"
 
     @property
     def token_path(self) -> Path:

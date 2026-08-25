@@ -108,7 +108,59 @@ crea connect         # add an account you skipped
 Open Obsidian and your job vault is there — every shoot, client and note as a
 plain document you can read and edit. Change something and CREA knows immediately.
 
-## 4. The screens
+## 4. Where everything comes from
+
+You don't need to find any of these. During setup CREA opens the right page for
+you and checks the key works before saving it.
+
+| Account | Exactly where | What you copy | Unlocks |
+|---|---|---|---|
+| **Acuity** | Left sidebar → Business Settings → Integrations → API → view credentials | User ID (numeric) + API Key | Bookings arriving on their own |
+| **Google** | [console.cloud.google.com](https://console.cloud.google.com/apis/credentials) → APIs & Services → Credentials → OAuth client ID → Desktop app | Client ID + secret, then Allow | Calendar, Drive, uni notes in Docs |
+| **WhatsApp** | Phone → WhatsApp → Settings → Linked Devices → Link a Device | Nothing — scan a QR | Booking messages, confirmations, editor |
+| **Higgsfield** | Account settings | API key | Shoots handed over for editing |
+| **Apify** | [console.apify.com](https://console.apify.com/settings/integrations) → Settings → Integrations | Personal API token | Lead tracking |
+
+### What runs underneath (all installed for you)
+
+| Piece | What it is |
+|---|---|
+| `hermes` | Runs the skills and the schedule |
+| `n8n` | Visual connections to outside services |
+| `whisper-cli` | Your speech to text, on the machine |
+| Pocket TTS | CREA's voice, on the machine |
+| `ffmpeg`, `exiftool` | Reels, and reading shot times off your files |
+| Obsidian | Where you read and edit the job vault |
+| `crea` | The command that drives it — [github.com/skw-fuj/crea](https://github.com/skw-fuj/crea) |
+
+**Your keys** go into one locked file on your Mac that only your account can
+read. Never in the settings file, never uploaded, and I never see them.
+
+## 5. What it can do
+
+Nineteen skills. **Fourteen run with no accounts connected at all.**
+
+| Say this | And it |
+|---|---|
+| *"what's in the pipeline?"* | Reads out every job by stage, and what you're owed |
+| *"mark Castle Hill as shot"* | Moves a job along the pipeline |
+| *"the card's in"* | Copies it, splits it into shoots on the time gaps, verifies every file |
+| *"is the card safe?"* | Only says yes once Drive has confirmed every file |
+| *"who owes me?"* | Drafts the invoices, names what's overdue |
+| *"I spent ninety-two on fuel"* | Logs it, works out the category itself |
+| *"remind me about Mum's birthday on the 3rd"* | Files it, brings it up on the day |
+| *"who haven't I spoken to?"* | Flags clients going quiet, most valuable first |
+| *"what should I focus on?"* | The morning board — three things, most urgent first |
+| *"cut me some Reels"* | Vertical drafts out of the footage, with captions |
+| *"take notes on this lecture"* | Slides in, revision notes out |
+
+Ten run **on a schedule** without being asked: briefing 6:30, Acuity every 15
+minutes, WhatsApp every 10, confirmations 5pm, invoicing Monday, board at 6.
+
+`crea skills` lists all nineteen and what each is waiting on. A skill that needs
+an account says so exactly — it never half-runs.
+
+## 6. The screens
 
 Seven panels, mapping onto the four skill groups in your plan:
 
@@ -125,7 +177,7 @@ Seven panels, mapping onto the four skill groups in your plan:
 Live mockup with the real voice:
 <https://claude.ai/code/artifact/c36157f1-2dba-4de3-84b1-9f005d70653e>
 
-## 5. What runs, measured
+## 7. What runs, measured
 
 Benchmarked on an Apple M1 / 8 GB — deliberately the worst machine this will
 ever run on. Your Mac Mini will be faster.
@@ -137,7 +189,7 @@ ever run on. Your Mac Mini will be faster.
 | Voice cost | **$0** — runs offline on the machine |
 | Running cost | **$0–15/mo** (vs $25–100 originally quoted) |
 
-## 6. Hardware
+## 8. Hardware
 
 **16 GB of memory is the floor.** This is the one specification that decides
 whether CREA feels instant or frustrating — 8 GB genuinely is not enough to hold
@@ -147,7 +199,7 @@ less than 16 GB.
 - Refurbished M1 Mac Mini — fine, *if* it's 16 GB
 - New base M4 Mac Mini — the safer buy
 
-## 7. WhatsApp
+## 9. WhatsApp
 
 `hermes whatsapp` pairs by QR code, like WhatsApp Web. **Your number stays a
 normal WhatsApp number** — no migration, no lost chat history.
@@ -160,7 +212,7 @@ held up to a month. Not worth it for a business whose bookings arrive by WhatsAp
 don't formally permit it and there's a small risk of a number being restricted.
 Widely used, rarely a problem — but if you'd rather not, use a second SIM for CREA.
 
-## 8. Call recording — the one legal condition
+## 10. Call recording — the one legal condition
 
 NSW requires **all parties** to consent. The Surveillance Devices Act 2007 has a
 narrow "lawful interests" exception, but *"so I get the booking details right"* is
@@ -185,7 +237,7 @@ doesn't play, nothing is recorded.
 **This is not legal advice.** Have the wording checked by someone qualified before
 switching it on. Every other capability you can enable at your own discretion.
 
-## 9. The card pipeline
+## 11. The card pipeline
 
 Detect the card, copy everything, split into shoots on a time gap, upload each to
 Drive, push to Higgsfield, tell Narendra.
@@ -202,7 +254,7 @@ client and a reputation. CREA verifies every copy and then *tells you* it's safe
 Once you've watched it get that right a dozen times, move it to `"ask"` — your
 call to make later, not a default to inherit now.
 
-## 10. Build order
+## 12. Build order
 
 | # | Phase | Time | Status |
 |---|---|---|---|
@@ -220,7 +272,7 @@ call to make later, not a default to inherit now.
 
 Full system, built steadily: **3–6 weeks part-time.**
 
-## 11. Moving machines
+## 13. Moving machines
 
 Every setting specific to you lives in `crea.config.json`. Moving CREA to a
 different Mac is copying that one file across.

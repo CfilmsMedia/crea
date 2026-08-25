@@ -19,6 +19,9 @@ class Connector(ABC):
     name = "connector"
     #: what the principal has to do to make this work, in their words
     how_to_connect = ""
+    #: the exact page the credential lives on, so nobody has to go hunting
+    console_url = ""
+    docs_url = ""
 
     def __init__(self, cfg):
         self.cfg = cfg
@@ -36,6 +39,7 @@ class Connector(ABC):
             "ready": ready,
             "enabled": bool(self.conf.get("enabled")),
             "connect": "" if ready else self.how_to_connect,
+            "where": "" if ready else self.console_url,
         }
 
     def require(self):

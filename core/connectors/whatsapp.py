@@ -21,7 +21,10 @@ from .base import Connector, ConnectorError
 
 class WhatsApp(Connector):
     name = "whatsapp"
-    how_to_connect = "Run: crea connect whatsapp  (scan the QR with your phone, like WhatsApp Web)"
+    how_to_connect = ("Run: crea connect whatsapp  —  on your phone: WhatsApp > Settings > "
+                      "Linked Devices > Link a Device, then scan the QR")
+    console_url = ""          # nothing to visit; pairing is on the phone
+    docs_url = "https://faq.whatsapp.com/378279804439436"
 
     @property
     def hermes(self) -> str:

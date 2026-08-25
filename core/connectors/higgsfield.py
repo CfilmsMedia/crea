@@ -15,7 +15,10 @@ API = "https://api.higgsfield.ai/v1"
 
 class Higgsfield(Connector):
     name = "higgsfield"
-    how_to_connect = "Run: crea connect higgsfield  (paste the API key from your account)"
+    how_to_connect = ("Run: crea connect higgsfield  —  paste the API key from your "
+                      "Higgsfield account settings")
+    console_url = "https://higgsfield.ai/"
+    docs_url = "https://higgsfield.ai/"
 
     def _key(self) -> str | None:
         return self.cfg.secret(self.conf.get("api_key_env", "HIGGSFIELD_API_KEY"))

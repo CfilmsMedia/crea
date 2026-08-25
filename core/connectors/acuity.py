@@ -17,7 +17,10 @@ API = "https://acuityscheduling.com/api/v1"
 
 class Acuity(Connector):
     name = "acuity"
-    how_to_connect = "Run: crea connect acuity  (find the key in Acuity > Integrations > API)"
+    how_to_connect = ("Run: crea connect acuity  —  in Acuity, left sidebar > "
+                      "Business Settings > Integrations > API > view credentials")
+    console_url = "https://secure.acuityscheduling.com/"
+    docs_url = "https://developers.acuityscheduling.com/reference/quick-start"
 
     def _auth(self) -> str | None:
         uid = self.cfg.secret(self.conf.get("user_id_env", "ACUITY_USER_ID"))
