@@ -59,7 +59,7 @@ class Vault:
 
     # ---------------------------------------------------------------- write
 
-    def write_job(self, job: Job) -> Path:
+    def write_job(self, job: Job, external_id: str | None = None) -> Path:
         job.validate()
         d = datetime.fromisoformat(job.shoot_at)
         name = f"{d:%Y-%m-%d} {job.title}"
@@ -76,6 +76,8 @@ class Vault:
             "source": job.source,
             "tags": job.tags or ["cfilms/job"],
         }
+        if external_id:
+            fm["external_id"] = external_id
         body = [
             _frontmatter(fm),
             f"# {job.title}",
@@ -129,6 +131,57 @@ class Vault:
                 fm["_title"] = p.stem
                 out.append(fm)
         return out
+
+    def client(self, name: str) -> dict | None:
+        p = self.root / "Clients" / f"{slugify(name)}.md"
+        return _read_frontmatter(p) if p.exists() else None
+
+    def clients(self) -> list[dict]:
+        out = []
+        for p in sorted((self.root / "Clients").glob("*.md")):
+            fm = _read_frontmatter(p)
+            if fm:
+                fm["_path"] = str(p)
+                fm["_name"] = p.stem.replace("-", " ")
+                out.append(fm)
+        return out
+
+    # ---------------------------------------------------------------- edit
+
+    def set_field(self, path, key: str, value) -> None:
+        """Change one frontmatter field, leaving the body untouched.
+
+        Job notes are the principal's documents as much as CREA's — rewriting a
+        whole file to flip one field would clobber anything he typed into it.
+        """
+        p = Path(path)
+        txt = p.read_text()
+        if not txt.startswith("---"):
+            return
+        _, fm, body = txt.split("---", 2)
+        lines, seen = [], False
+        for line in fm.strip().splitlines():
+            if line.split(":", 1)[0].strip() == key:
+                lines.append(f"{key}: {json.dumps(value) if isinstance(value,(list,dict)) else value}")
+                seen = True
+            else:
+                lines.append(line)
+        if not seen:
+            lines.append(f"{key}: {json.dumps(value) if isinstance(value,(list,dict)) else value}")
+        p.write_text("---\n" + "\n".join(lines) + "\n---" + body)
+
+    def set_status(self, path, status: str) -> None:
+        if status not in STATUSES:
+            raise ValueError(f"unknown status {status!r}")
+        self.set_field(path, "status", status)
+        # keep the visible checklist in step with the frontmatter
+        p = Path(path)
+        txt = p.read_text()
+        i = STATUSES.index(status)
+        new = "\n".join(f"- [{'x' if n <= i else ' '}] {s}"
+                         for n, s in enumerate(STATUSES))
+        txt = re.sub(r"(## Progress\n)(?:- \[.\] \w+\n?)+", r"\1" + new + "\n", txt)
+        p.write_text(txt)
 
     # ------------------------------------------------------------ dashboard
 

@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 # The audio stack (sounddevice) lives in CREA's venv, not in system python.
-# Re-exec into it once, so `crea listen` works no matter how it was invoked.
+# Re-exec into it once, so every command works no matter how it was invoked.
 _VENV = ROOT / ".venv/bin/python3"
 if _VENV.exists() and not sys.executable.startswith(str(ROOT / ".venv")):
     import os
@@ -22,15 +22,40 @@ from core.vault import Vault
 
 USAGE = """crea <command>
 
-  status              honest health of every component
-  init                create the vault skeleton
-  fixtures            seed synthetic Cfilms demo data
-  dashboard           regenerate the vault dashboard
-  ask "<question>"    one turn, spoken aloud
-  say "<text>"        speak a line (voice check)
-  listen              run the always-on wake-word loop
-  voice start|stop    manage the local TTS daemon
+  Talking to it
+    ask "<question>"      one question, answered out loud
+    listen                the always-on "Hey CREA" loop
+    say "<text>"          speak a line (voice check)
+    brief                 today's briefing, spoken
+
+  Doing things
+    skills                every skill, and what it needs
+    run <skill> [args]    run one skill now
+    jobs [status]         the pipeline
+    card                  import a plugged-in SD card
+    board                 what deserves attention today
+
+  Setting up
+    status                honest health of every part
+    connect [service]     link Acuity, Google, WhatsApp, Higgsfield, Apify
+    schedule              install the background jobs
+    init                  create the vault
+    fixtures              load demo data
+    voice start|stop      the local speech service
 """
+
+
+def _skills(cfg, vault):
+    from core.connectors import load_all
+    from core.skills import build
+    return build(cfg, vault, load_all(cfg))
+
+
+def _print_result(r) -> int:
+    print(r["summary"])
+    if not r.get("ok"):
+        return 1
+    return 0
 
 
 def main(argv: list[str]) -> int:
@@ -39,11 +64,18 @@ def main(argv: list[str]) -> int:
         return 0
 
     cfg = load()
+    # secrets live outside the config file; pull them into the environment first
+    from core.connect import load_env
+    load_env(cfg)
     vault = Vault(cfg.path("paths.vault"))
     cmd = argv[1]
+    rest = argv[2:]
+
+    # ---------------------------------------------------------------- status
 
     if cmd == "status":
         from core.brain import make_brain
+        from core.connectors import status_all
         from core.voice.providers import make_stt, make_tts
         out = {"agent": cfg.get("identity.agent_name"),
                "vault": str(vault.root),
@@ -55,51 +87,144 @@ def main(argv: list[str]) -> int:
                 out[name] = fn()
             except Exception as e:
                 out[name] = {"reachable": False, "error": str(e)}
-        out["integrations"] = {
-            k: v.get("status") for k, v in cfg.get("integrations").items()
-            if isinstance(v, dict)
-        }
+        out["connectors"] = status_all(cfg)
+        skills = _skills(cfg, vault)
+        out["skills"] = {"total": len(skills),
+                         "ready": sum(1 for s in skills.values() if s.available()),
+                         "blocked": {n: s.blocked_by()
+                                     for n, s in skills.items() if not s.available()}}
         print(json.dumps(out, indent=2))
         return 0
 
+    # ---------------------------------------------------------------- skills
+
+    if cmd == "skills":
+        skills = _skills(cfg, vault)
+        width = max(len(n) for n in skills)
+        for name, s in skills.items():
+            mark = "ok " if s.available() else "needs"
+            need = "" if s.available() else " " + ", ".join(s.blocked_by())
+            sched = f"  [{s.schedule}]" if s.schedule else ""
+            print(f"  {mark:<5} {name:<{width}}  {s.title}{need}{sched}")
+        ready = sum(1 for s in skills.values() if s.available())
+        print(f"\n{ready}/{len(skills)} ready. The rest need an account connecting "
+              f"— run: crea connect")
+        return 0
+
+    if cmd == "run":
+        if not rest:
+            print("which skill? run: crea skills")
+            return 1
+        skills = _skills(cfg, vault)
+        name = rest[0]
+        if name not in skills:
+            print(f"no skill called '{name}'. run: crea skills")
+            return 1
+        def coerce(v: str):
+            """Command-line arguments are strings; skills expect real types."""
+            if v == "":
+                return True
+            low = v.lower()
+            if low in ("true", "yes", "on"):
+                return True
+            if low in ("false", "no", "off"):
+                return False
+            try:
+                return int(v)
+            except ValueError:
+                pass
+            try:
+                return float(v.lstrip("$").replace(",", ""))
+            except ValueError:
+                return v
+
+        kwargs = {}
+        for arg in rest[1:]:
+            if arg.startswith("--"):
+                k, _, v = arg[2:].partition("=")
+                kwargs[k.replace("-", "_")] = coerce(v)
+            else:
+                kwargs.setdefault("text", arg)
+        return _print_result(skills[name].run(**kwargs))
+
+    # shorthands for the ones used daily
+    if cmd in ("card", "board", "brief", "leads", "checkins", "invoice"):
+        skills = _skills(cfg, vault)
+        key = {"card": "card", "board": "board", "brief": "brief",
+               "leads": "leads", "checkins": "checkins", "invoice": "invoice"}[cmd]
+        return _print_result(skills[key].run(**({"speak": True} if cmd in ("brief",) else {})))
+
+    if cmd == "jobs":
+        skills = _skills(cfg, vault)
+        return _print_result(skills["jobs"].run(status=rest[0] if rest else None))
+
+    # --------------------------------------------------------------- connect
+
+    if cmd == "connect":
+        from core import connect as connect_mod
+        return connect_mod.run(cfg, rest[0] if rest else None)
+
+    if cmd == "schedule":
+        from core import scheduler
+        skills = _skills(cfg, vault)
+        if rest[:1] == ["off"]:
+            print(f"removed {scheduler.uninstall()} scheduled job(s)")
+            return 0
+        if rest[:1] == ["status"]:
+            rows = scheduler.status()
+            if not rows:
+                print("no scheduled jobs installed. run: crea schedule")
+                return 0
+            for r in rows:
+                print(f"  {r['skill']:<16} last exit {r['last_exit']}"
+                      f"{'  (running)' if r['running'] else ''}")
+            return 0
+        done = scheduler.install(cfg, skills)
+        for d in done:
+            mark = "ok  " if d["ok"] else "FAIL"
+            print(f"  {mark} {d['skill']:<16} {d.get('schedule','')}")
+        print(f"\n{sum(1 for d in done if d['ok'])} background job(s) installed.")
+        return 0
+
+    # ----------------------------------------------------------------- vault
+
     if cmd == "init":
-        vault.init(); vault.render_dashboard()
+        vault.init()
+        vault.render_dashboard()
         print(f"vault ready at {vault.root}")
         return 0
 
     if cmd == "fixtures":
-        from core.fixtures import build
-        print(json.dumps(build(vault), indent=2))
+        from core.fixtures import build as seed
+        print(json.dumps(seed(vault), indent=2))
         return 0
 
     if cmd == "dashboard":
         print(vault.render_dashboard())
         return 0
 
+    # ----------------------------------------------------------------- voice
+
     if cmd == "say":
         from core.voice.loop import play
         from core.voice.providers import make_tts
-        play(make_tts(cfg).speak(" ".join(argv[2:]) or "CREA online."))
+        play(make_tts(cfg).speak(" ".join(rest) or "CREA online."))
         return 0
 
     if cmd == "ask":
         from core.voice.loop import answer
-        print(answer(cfg, vault, " ".join(argv[2:])))
+        print(answer(cfg, vault, " ".join(rest)))
         return 0
 
     if cmd == "listen":
-        from core.voice.loop import run
-        run(cfg, vault)
+        from core.voice.loop import run as listen
+        listen(cfg, vault)
         return 0
 
     if cmd == "voice":
-        # CREA ships its own voice service. This used to point at a developer
-        # machine's install, which simply does not exist on a fresh Mac.
         tts_dir = Path(cfg.get("paths.root")) / "tts"
-        server = tts_dir / "server.py"
-        py = tts_dir / ".venv/bin/python"
-        action = argv[2:3] or ["status"]
-
+        server, py = tts_dir / "server.py", tts_dir / ".venv/bin/python"
+        action = rest or ["status"]
         if action == ["start"]:
             if not server.exists():
                 print(f"voice service missing at {server} — re-run the installer")
@@ -108,9 +233,9 @@ def main(argv: list[str]) -> int:
                 print(f"voice environment missing at {py} — re-run the installer")
                 return 1
             import urllib.request
-            try:                       # never start a second copy
-                urllib.request.urlopen(cfg.get("voice.tts.endpoint").rsplit("/", 1)[0]
-                                       + "/health", timeout=3)
+            try:
+                urllib.request.urlopen(
+                    cfg.get("voice.tts.endpoint").rsplit("/", 1)[0] + "/health", timeout=3)
                 print("voice daemon already running")
                 return 0
             except Exception:
@@ -120,10 +245,8 @@ def main(argv: list[str]) -> int:
                              stderr=subprocess.STDOUT)
             print("voice daemon starting (about 20s to warm up)")
         elif action == ["stop"]:
-            # Match the absolute path this command launches, not a fragment that
-            # silently matches nothing.
-            n = subprocess.run(["pkill", "-f", str(server)]).returncode
-            print("voice daemon stopped" if n == 0 else "no voice daemon was running")
+            rc = subprocess.run(["pkill", "-f", str(server)]).returncode
+            print("voice daemon stopped" if rc == 0 else "no voice daemon was running")
         else:
             print("crea voice start|stop")
         return 0

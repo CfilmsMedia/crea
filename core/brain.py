@@ -65,8 +65,9 @@ class HermesBrain:
         return proc.stdout.strip()
 
 
-def make_brain(cfg) -> HermesBrain:
+def make_brain(cfg, timeout: int = 300) -> HermesBrain:
     if cfg.get("brain.provider") != "hermes":
         raise BrainError(f"unknown brain provider: {cfg.get('brain.provider')}")
     return HermesBrain(model=cfg.get("brain.model", None),
-                       provider=cfg.get("brain.hermes_provider", None))
+                       provider=cfg.get("brain.hermes_provider", None),
+                       timeout=timeout)

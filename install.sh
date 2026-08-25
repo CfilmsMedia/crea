@@ -330,45 +330,34 @@ else
   fi
 fi
 
-# ---------------------------------------------------------------- 13. accounts
+# ---------------------------------------------------------------- 13. schedule
+
+step "Background jobs"
+
+if "$CREA_HOME/bin/crea" schedule >&3 2>&1; then
+  N=$("$CREA_HOME/bin/crea" schedule status 2>/dev/null | grep -c . || echo 0)
+  ok "$N scheduled job(s) — briefing, bookings, invoicing, the board"
+else
+  bad "could not install the scheduled jobs — see $LOG"
+fi
+
+# ---------------------------------------------------------------- 14. accounts
 
 step "Connecting your accounts"
 
 cat <<'EOS'
-  These are the only parts that need you. Each one is optional — skip any of them
-  now and run 'crea connect' later. Nothing already installed depends on them.
+  This is the only part that needs you. Each one is optional and each can be
+  done later with `crea connect`. Everything installed above already works
+  without them.
 EOS
 
-connect(){ # key  label  instructions...
-  local key="$1" label="$2"; shift 2
-  ask "Connect $label now? [y/N]"
-  read -r yn </dev/tty || yn=n
-  if [[ ! "$yn" =~ ^[Yy] ]]; then warn "skipped $label — run 'crea connect $key' later"; return; fi
-  printf "%s\n" "$@"
-  case "$key" in
-    whatsapp) hermes whatsapp </dev/tty ;;
-    acuity)
-      ask "Paste your Acuity User ID:";  read -r aid </dev/tty
-      ask "Paste your Acuity API key:";  read -rs akey </dev/tty; echo
-      setenv ACUITY_USER_ID "$aid"; setenv ACUITY_API_KEY "$akey"
-      "$CREA_HOME/bin/crea" verify acuity ;;
-    google)   n8n </dev/tty & sleep 6
-              printf "  Open http://localhost:5678 and add your Google credential.\n" ;;
-  esac
-}
+if [ -t 0 ]; then
+  "$CREA_HOME/bin/crea" connect </dev/tty || true
+else
+  warn "not an interactive terminal — run 'crea connect' when you're ready"
+fi
 
-connect whatsapp "WhatsApp" \
-  "  A QR code will appear. Open WhatsApp on your phone →" \
-  "  Settings → Linked Devices → Link a Device, and scan it." \
-  "  Your number stays a normal WhatsApp number."
-
-connect acuity "Acuity Scheduling" \
-  "  Find these in Acuity → Integrations → API."
-
-connect google "Google (Calendar + Drive)" \
-  "  This opens n8n in your browser to authorise Google."
-
-# ---------------------------------------------------------------- 14. verify
+# ---------------------------------------------------------------- 15. verify
 
 step "Verifying"
 
@@ -380,9 +369,15 @@ check(){ # label  command...
 }
 check "voice service"  curl -fsS -m 8 http://127.0.0.1:8812/health
 check "speech-to-text" command -v whisper-cli
+check "speech model"   test -s "$CREA_HOME/var/models/ggml-base.en.bin"
 check "brain"          command -v hermes
 check "integrations"   command -v n8n
 check "vault"          test -f "$CREA_HOME/vault/CREA.md"
+check "skills"         "$CREA_HOME/bin/crea" skills
+
+READY=$("$CREA_HOME/bin/crea" skills 2>/dev/null | grep -c "^  ok " || echo 0)
+TOTAL=$("$CREA_HOME/bin/crea" skills 2>/dev/null | grep -cE "^  (ok|needs)" || echo 0)
+[ "$READY" -gt 0 ] && ok "$READY of $TOTAL skills ready to run now"
 
 printf "\n"
 if (( ${#FAILED[@]} == 0 )); then
@@ -392,8 +387,10 @@ ${G}${B}CREA is installed and running.${N}
   Say  ${B}"Hey CREA"${N}  out loud, or try:
 
     ${B}crea ask "what have I got on this week?"${N}
+    ${B}crea skills${N}                 everything it can do
     ${B}crea status${N}                 how every part is doing
     ${B}crea connect${N}                add an account you skipped
+    ${B}crea card${N}                   import a plugged-in SD card
 
   Your job vault:  $CREA_HOME/vault
   Full log:        $LOG
