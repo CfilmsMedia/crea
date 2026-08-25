@@ -1,6 +1,6 @@
-# Handover message to Connell — final
+# Handover message to Connell — v1.1 (final)
 
-Everything he needs to run it himself. Email version below; short version after.
+Email version below; short version after.
 
 ---
 
@@ -44,9 +44,9 @@ run again any time — it leaves alone whatever's already there.
 
 **THE FIVE ACCOUNTS**
 
-Near the end it asks about these. It opens each page in your browser for you,
-you paste the key, and it checks the key actually works before saving it. Skip
-any of them and add them later with `crea connect`.
+Near the end it asks about these. It opens each page in your browser for you, you
+paste the key, and it checks the key actually works before saving it. Skip any of
+them and add them later with `crea connect`.
 
 | Account | Where exactly | What you copy |
 |---|---|---|
@@ -95,8 +95,35 @@ All installed for you. Listed so nothing's a mystery.
 - **crea** — the command that drives all of it
 
 Acuity, Google, Higgsfield and Apify are reached over their normal web APIs.
-WhatsApp connects the way WhatsApp Web does. There's nothing exotic in there
-and nothing you're locked into.
+WhatsApp connects the way WhatsApp Web does. Nothing exotic, nothing you're
+locked into.
+
+---
+
+**A FEW THINGS THAT CAME OUT OF TESTING**
+
+These are in version 1.1 because they only turn up once something actually runs
+on a machine that has to stay up for months.
+
+**It can learn your voice.** By default CREA answers anyone who says its name.
+`crea enrol` takes about a minute and after that it only answers you. It's off
+unless you turn it on — worth leaving off if an assistant or your editor should
+be able to ask it things too.
+
+**It keeps the Mac awake.** An always-on assistant that goes to sleep isn't
+always on. It handles that itself without changing your own power settings.
+
+**The clock follows daylight saving.** Everything runs on Sydney time properly,
+rather than trusting whatever timezone got picked during first-time setup. If
+that were wrong your morning brief would fire at the wrong hour and invoices
+would be dated a day out — and it wouldn't look like a clock problem.
+
+**Section 13 covers using it from your phone** — three ways, two of them free,
+and an honest answer on whether the paid option is worth it. Don't decide on day
+one; give it a fortnight first.
+
+**Section 14 covers what to do when something breaks** — the five things that
+catch every setup like this, and which ones are already handled.
 
 ---
 
@@ -142,7 +169,7 @@ Tris
 
 ## WhatsApp / short version
 
-> Hey mate, CREA's done. Everything from the August plan, built and working.
+> Hey mate, CREA's done — everything from the August plan, built and working.
 >
 > Manual: https://claude.ai/code/artifact/6d9a6d2f-3a0f-4358-b866-e2141be5bdb6
 > Interface (tap the orange circle, it talks): https://claude.ai/code/artifact/c36157f1-2dba-4de3-84b1-9f005d70653e
@@ -159,8 +186,11 @@ Tris
 >
 > Then just talk to it: "Hey CREA, what have I got on today?"
 >
-> Costs about $0–15/month instead of the $25–100 we planned, and your WhatsApp
-> number stays exactly as it is.
+> It can also learn your voice so it only answers you, it keeps the Mac from
+> sleeping, and there are 26 voices if the default one grates.
+>
+> About $0–15/month instead of the $25–100 we planned, and your WhatsApp number
+> stays exactly as it is.
 >
 > Heads up: the voice on that second link is real, but all the jobs and dollar
 > figures are made-up test data, and the layout's a proposal — tell me what you'd
@@ -169,3 +199,12 @@ Tris
 > Main thing: **order the Mini with 16GB.** Not 8. It's the one spec that matters.
 >
 > (Pronounced kree-ah, not cray 😄)
+
+---
+
+## Before sending
+
+- [x] Both artifact links set to anyone-with-the-link — verified unauthenticated
+- [x] GitHub repo public — verified unauthenticated
+- [x] Manual and shell both stamped v1.1
+- [ ] Decide whether to raise pricing for the build. This draft deliberately does not.
