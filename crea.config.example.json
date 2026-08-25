@@ -35,7 +35,36 @@
       "paid_alternative": {
         "provider": "elevenlabs",
         "voice_id": null
-      }
+      },
+      "available_voices": [
+        "cosette",
+        "marius",
+        "javert",
+        "alba",
+        "jean",
+        "anna",
+        "vera",
+        "fantine",
+        "charles",
+        "paul",
+        "eponine",
+        "azelma",
+        "george",
+        "mary",
+        "jane",
+        "michael",
+        "eve",
+        "bill_boerst",
+        "peter_yearsley",
+        "stuart_bell",
+        "caro_davy",
+        "giovanni",
+        "lola",
+        "juergen",
+        "rafael",
+        "estelle"
+      ],
+      "_voice_note": "26 built-in voices, all free and on-device. Change 'voice' to any of them and restart the voice service. Cloning a specific person's voice is NOT available on the free tier \u2014 those weights are gated behind a HuggingFace licence. For a cloned voice use the paid ElevenLabs path."
     },
     "stt": {
       "provider": "whispercpp",
@@ -52,39 +81,40 @@
       "model_path": "~/crea/var/models/hey_crea.onnx",
       "threshold": 0.6,
       "_note": "Wake detection is fully on-device. No audio leaves the machine until the phrase fires.",
-      "_provider_note": "vad-whisper works on day one with no training. Switch to 'openwakeword' only once a trained hey_crea.onnx exists at model_path \u2014 it is lower CPU but needs that file."
+      "_provider_note": "vad-whisper works on day one with no training. Switch to 'openwakeword' only once a trained hey_crea.onnx exists at model_path \u2014 it is lower CPU but needs that file.",
+      "speaker_verification": {
+        "enabled": false,
+        "_note": "Not built. CREA currently wakes for ANY voice saying the phrase, like a HomePod rather than like Siri's 'Recognise My Voice'. Adding it needs a speaker-embedding model; the trade is that a strict check turns missed wakes into the main failure. Decide before enabling."
+      }
     }
   },
   "integrations": {
-    "_status_note": "status is a CLAIM until a call succeeds in-transcript. Never trust this field alone.",
+    "_status_note": "'ready' is computed live from real credentials, never stored. crea status tells the truth.",
     "acuity": {
-      "enabled": false,
-      "status": "not-wired",
-      "user_id": null,
+      "enabled": true,
+      "user_id_env": "ACUITY_USER_ID",
       "api_key_env": "ACUITY_API_KEY"
     },
     "google": {
-      "enabled": false,
-      "status": "not-wired",
+      "enabled": true,
       "calendar_id": null,
       "drive_root_folder_id": null
     },
     "whatsapp": {
-      "enabled": false,
-      "status": "not-wired",
+      "enabled": true,
       "mode": "baileys-personal",
-      "_mode_note": "baileys-personal pairs by QR like WhatsApp Web. Does NOT migrate the number to the Business Cloud API, so the consumer app and chat history survive. Unofficial client: small ban-risk on the number, disclose to principal."
+      "_mode_note": "QR pairing like WhatsApp Web. Does NOT migrate the number to the Business Cloud API, so the consumer app and chat history survive. Unofficial client: small ban-risk, disclosed to the principal.",
+      "editor_handle": null
     },
     "higgsfield": {
-      "enabled": false,
-      "status": "not-wired"
+      "enabled": true,
+      "api_key_env": "HIGGSFIELD_API_KEY",
+      "preset": null
     },
-    "editor_notify": {
-      "enabled": false,
-      "status": "not-wired",
-      "name": "Narendra",
-      "channel": "whatsapp",
-      "handle": null
+    "apify": {
+      "enabled": true,
+      "api_token_env": "APIFY_TOKEN",
+      "dataset_id": null
     }
   },
   "call_recording": {
