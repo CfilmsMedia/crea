@@ -1,90 +1,138 @@
-# Draft message to Connell
+# Handover message to Connell — final
 
-Updated after the full build. Email is the main version; the WhatsApp one is for
-sending the links and letting the manual do the talking.
+Everything he needs to run it himself. Email version below; short version after.
 
 ---
 
-## Email / long version
+## Email
 
-**Subject:** CREA is built
+**Subject:** CREA is ready — here's everything to run it
 
 Hey Connell,
 
-CREA's done. Not the core — the whole thing. Every skill in the plan you sent me
-in August exists and works.
+CREA's finished. Every skill from the plan you sent me in August is built and
+working. Here's everything you need.
 
-It talks and it listens. Ask it what you've got on this week, or how much you're
-owed, and it tells you out loud. Say "the card's in" and it copies the card,
-splits it into separate shoots by working out where the gaps between shots are,
-and checks every single file copied properly before it'll tell you the card is
-safe to wipe. Say "I spent ninety-two on fuel" and it files it under fuel without
-being told. Ask it what you should focus on and it gives you three things, most
-urgent first.
+---
 
-Nineteen skills all up. Fourteen of them work the moment it's installed, with no
-accounts connected at all. Ten of them run on their own schedule — the briefing
-before you're up at half six, Acuity checked every fifteen minutes, WhatsApp
-every ten, tomorrow's shoots confirmed at five, invoicing Monday mornings.
+**THE THREE LINKS**
 
-Two things changed from the August plan, both in your favour.
-
-**It costs almost nothing to run.** The original plan budgeted $25–100 a month
-for the voice and the AI. Neither turned out to be necessary. The voice runs
-entirely on the machine, no account and no per-word cost, and the thinking goes
-through free model tiers. Realistically **$0–15 a month**. I measured that on a
-2020 MacBook, deliberately a slower machine than the one you'll use.
-
-**Your WhatsApp number stays your number.** The obvious way to read WhatsApp
-would have meant that number could no longer use the normal app and your chat
-history gets wiped. Not worth it for a business that books over WhatsApp. There's
-a second way that pairs by QR code like WhatsApp Web, and everything stays as it
-is. One caveat on it in the manual worth reading.
-
-Here's everything:
-
-**The manual** — what it does, what it costs, how to set it up
+Manual — what it does, what it costs, how to set it up
 https://claude.ai/code/artifact/6d9a6d2f-3a0f-4358-b866-e2141be5bdb6
 
-**The interface** — click the orange circle and it talks to you
+Interface — click the orange circle and it talks to you
 https://claude.ai/code/artifact/c36157f1-2dba-4de3-84b1-9f005d70653e
 
-**The code** — everything, open, yours
+Code — all of it, open, yours
 https://github.com/skw-fuj/crea
 
-Two things before you look at that middle link. The **voice you hear is real** —
-that's CREA, generated on the machine, no subscription. But **every job, client
-and dollar figure on those screens is made up.** Aisha Rahman doesn't exist, the
-$7,170 isn't real. It's test data so the thing has something to run against
-before your accounts are plugged in. And the layout is a proposal, not a
-decision. If a screen is missing something you'd use, or something on it is
-useless to you, now is the cheap time to say so.
+---
 
-**Setting it up is one line.** You plug the Mac Mini in, open Terminal, paste one
-command, and walk away for twenty minutes. It installs everything itself — the
-speech models, the voice, the scheduler, the lot. Then it asks about five
-accounts: Acuity, Google, WhatsApp, Higgsfield and Apify. For each one it opens
-the right page in your browser, you paste the key, and it checks the key actually
-works before saving it. You can skip any of them and do it later. Nothing to
-gather beforehand.
+**TO INSTALL — one line**
+
+Plug the Mac Mini in, finish Apple's normal setup, open **Terminal**
+(press ⌘ Space, type "terminal", hit Enter), and paste this:
+
+```
+curl -fsSL https://raw.githubusercontent.com/skw-fuj/crea/main/install.sh | bash
+```
+
+Then walk away for about twenty minutes. It installs everything itself. Safe to
+run again any time — it leaves alone whatever's already there.
+
+---
+
+**THE FIVE ACCOUNTS**
+
+Near the end it asks about these. It opens each page in your browser for you,
+you paste the key, and it checks the key actually works before saving it. Skip
+any of them and add them later with `crea connect`.
+
+| Account | Where exactly | What you copy |
+|---|---|---|
+| Acuity | Left sidebar → Business Settings → Integrations → API → view credentials | User ID (the numeric one) and API Key |
+| Google | console.cloud.google.com → APIs & Services → Credentials → Create credentials → OAuth client ID → Desktop app | Client ID + secret, then click Allow |
+| WhatsApp | Your phone: WhatsApp → Settings → Linked Devices → Link a Device | Nothing — you scan a QR code |
+| Higgsfield | Your account settings | API key |
+| Apify | console.apify.com → Settings → Integrations | Personal API token |
 
 Your keys go into one locked file on your own Mac. Not in the settings file,
 never uploaded, and I never see them.
 
-**What I need from you:**
+---
 
-1. **Order the Mac Mini, and get 16GB of memory.** This is the only spec that
-   matters. 8GB genuinely isn't enough and it'll feel sluggish in a way you'll
-   notice every day. Refurbished M1 is fine if it's 16GB, otherwise the base M4.
-2. **Have a listen to the voice** and tell me if it suits you. There's a paid
-   voice that sounds better if you want it later, but I'd start free and see if
-   you ever miss it.
-3. **Have a look at the screens** and tell me what you'd change.
-4. **Decide on WhatsApp** — your existing number, or a second SIM just for CREA.
-   Section 9 of the manual has what you need to choose.
+**COMMANDS YOU'LL ACTUALLY USE**
 
-One last thing: it's pronounced **kree-ah**, not "cray". That matters more than
-it sounds like it should, because the speech recognition is tuned for it.
+```
+crea skills                     everything it can do, and what each needs
+crea status                     honest health of every part
+crea connect                    add an account you skipped
+
+crea ask "how much am I owed?"  ask by typing instead of talking
+crea card                       import a plugged-in SD card
+crea jobs                       the pipeline
+crea board                      what deserves attention today
+crea brief                      today's briefing, spoken
+
+crea enrol                      teach it your voice
+crea voice-check on             then it only answers you
+```
+
+Or just talk to it: **"Hey CREA, what have I got on today?"**
+
+---
+
+**WHAT'S RUNNING UNDERNEATH**
+
+All installed for you. Listed so nothing's a mystery.
+
+- **hermes** — runs the skills and the schedule
+- **n8n** — the visual connections out to Acuity, Google and WhatsApp
+- **whisper.cpp** — turns your speech into text, on the machine
+- **Pocket TTS** — CREA's voice, on the machine, 26 voices to pick from
+- **ffmpeg / exiftool** — Reels, and reading shot times off your files
+- **Obsidian** — where you read and edit your own job vault
+- **crea** — the command that drives all of it
+
+Acuity, Google, Higgsfield and Apify are reached over their normal web APIs.
+WhatsApp connects the way WhatsApp Web does. There's nothing exotic in there
+and nothing you're locked into.
+
+---
+
+**TWO THINGS BEFORE YOU LOOK**
+
+The **voice is real** — that's CREA, generated on the machine, no subscription.
+
+But **every job, client and dollar figure on those screens is made up.** Aisha
+Rahman doesn't exist, the $7,170 isn't real. It's test data so the thing has
+something to run against before your accounts are connected. The layout is a
+proposal too — if a screen's missing something you'd use, or something on it is
+useless to you, now's the cheap time to say so.
+
+---
+
+**WHAT IT COSTS**
+
+$0–15 a month, against the $25–100 the original plan budgeted. The voice runs on
+the machine and the thinking goes through free tiers. I measured that on a 2020
+MacBook, deliberately slower than what you'll be using.
+
+---
+
+**WHAT I NEED FROM YOU**
+
+1. **Order the Mac Mini — 16GB of memory.** This is the only spec that matters.
+   8GB genuinely isn't enough and you'd notice it daily. Refurbished M1 is fine
+   if it's 16GB, otherwise the base M4.
+2. **Listen to the voice** and tell me if it suits you. There are 26 built in, so
+   if that one grates we just change it.
+3. **Look at the screens** and tell me what you'd change.
+4. **Decide on WhatsApp** — your existing number, or a second SIM for CREA. The
+   manual has what you need to choose.
+
+One last thing: it's pronounced **kree-ah**, not "cray". Matters more than it
+sounds like, because the speech recognition is tuned for it.
 
 Once the Mini turns up it's about twenty minutes to a working system.
 
@@ -94,39 +142,30 @@ Tris
 
 ## WhatsApp / short version
 
-> Hey mate, CREA's done — not just the core, the whole thing. Nineteen skills,
-> all of it working.
->
-> It listens and talks back. Plug an SD card in and it sorts the shoot, splits it
-> by the gaps between shots, and checks every file before it'll say the card's
-> safe to wipe. Tell it what you spent and it files it. Ask what to focus on and
-> it tells you.
->
-> Two bits of good news: it's about **$0–15/month** instead of the $25–100 we
-> planned, and your **WhatsApp number stays exactly as it is** — no migration, no
-> losing your chats.
+> Hey mate, CREA's done. Everything from the August plan, built and working.
 >
 > Manual: https://claude.ai/code/artifact/6d9a6d2f-3a0f-4358-b866-e2141be5bdb6
 > Interface (tap the orange circle, it talks): https://claude.ai/code/artifact/c36157f1-2dba-4de3-84b1-9f005d70653e
 > Code: https://github.com/skw-fuj/crea
 >
-> The voice on that second link is real. All the jobs and dollar figures on it are
-> made-up test data, and the layout's a proposal — tell me what you'd change.
+> To install: plug the Mini in, open Terminal, paste this one line, walk away for
+> twenty minutes —
 >
-> Setup is one line in Terminal and twenty minutes. It opens each account page for
-> you and checks the keys work.
+> `curl -fsSL https://raw.githubusercontent.com/skw-fuj/crea/main/install.sh | bash`
 >
-> Main thing I need: **order the Mac Mini with 16GB.** Not 8. It's the one spec
-> that matters.
+> It installs the lot, then asks about five accounts (Acuity, Google, WhatsApp,
+> Higgsfield, Apify). It opens each page for you and checks the keys work. Skip
+> any and add them later.
 >
-> (It's pronounced kree-ah, not cray 😄)
-
----
-
-## Before sending
-
-- [x] Both artifact links set to anyone-with-the-link — verified in an
-      unauthenticated browser, both render.
-- [x] GitHub repo public — verified unauthenticated.
-- [ ] Decide whether to raise pricing for the build. This draft deliberately
-      does not.
+> Then just talk to it: "Hey CREA, what have I got on today?"
+>
+> Costs about $0–15/month instead of the $25–100 we planned, and your WhatsApp
+> number stays exactly as it is.
+>
+> Heads up: the voice on that second link is real, but all the jobs and dollar
+> figures are made-up test data, and the layout's a proposal — tell me what you'd
+> change.
+>
+> Main thing: **order the Mini with 16GB.** Not 8. It's the one spec that matters.
+>
+> (Pronounced kree-ah, not cray 😄)
