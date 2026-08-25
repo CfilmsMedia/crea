@@ -25,7 +25,9 @@ USAGE = """crea <command>
   Talking to it
     ask "<question>"      one question, answered out loud
     listen                the always-on "Hey CREA" loop
-    say "<text>"          speak a line (voice check)
+    say "<text>"          speak a line
+    enrol                 teach CREA your voice
+    voice-check on|off    only answer you, or answer anyone
     brief                 today's briefing, spoken
 
   Doing things
@@ -214,6 +216,74 @@ def main(argv: list[str]) -> int:
     if cmd == "ask":
         from core.voice.loop import answer
         print(answer(cfg, vault, " ".join(rest)))
+        return 0
+
+    if cmd == "enrol" or cmd == "enroll":
+        from core.voice.speaker import Speaker
+        from core.voice.wake import record_command, write_wav, rms
+        import numpy as np
+        import sounddevice as sd
+        sp = Speaker(cfg)
+        if not sp.available():
+            print("The voice service isn't running, or speaker recognition isn't installed.")
+            print("Try:  crea voice start")
+            return 1
+
+        n = sp.min_samples
+        phrase = cfg.get("identity.wake_phrase")
+        print(f"\nTeaching CREA your voice.\n")
+        print(f"It'll ask you to say \"{phrase}\" {n} times.")
+        print("Say it normally, the way you actually would. Vary it a bit —")
+        print("closer, further, mid-sentence. That makes it more reliable.\n")
+
+        samples = []
+        for i in range(1, n + 1):
+            input(f"  {i} of {n} — press Enter, then say it: ")
+            audio = record_command(max_seconds=4.0, silence_run=0.8)
+            data = audio.read_bytes()
+            audio.unlink(missing_ok=True)
+            import wave as _w, io as _io
+            with _w.open(_io.BytesIO(data)) as w:
+                secs = w.getnframes() / w.getframerate()
+            if secs < 0.6:
+                print("     too short, let's try that one again")
+                continue
+            samples.append(data)
+            print(f"     got it ({secs:.1f}s)")
+
+        if len(samples) < 2:
+            print("\nNot enough usable recordings. Run it again.")
+            return 1
+        try:
+            out = sp.enrol(samples)
+        except Exception as e:
+            print(f"\nCouldn't save your voice: {e}")
+            return 1
+
+        print(f"\nSaved. {out['samples']} recordings, consistency {out['self_similarity']:.2f}.")
+        if out["weakest"] < 0.75:
+            print("One of those was noticeably different from the others — if CREA")
+            print("misses you later, run this again somewhere quieter.")
+        if not sp.enabled:
+            print("\nVoice check is currently OFF, so CREA still answers anyone.")
+            print("Turn it on with:  crea voice-check on")
+        return 0
+
+    if cmd == "voice-check":
+        from core.connect import set_config
+        from core.voice.speaker import Speaker
+        sp = Speaker(cfg)
+        arg = rest[0] if rest else "status"
+        if arg in ("on", "off"):
+            if arg == "on" and not sp.enrolled():
+                print("Nobody's enrolled yet. Run:  crea enrol")
+                return 1
+            set_config(cfg, "voice.wake.speaker_verification.enabled", arg == "on")
+            print(f"Voice check {arg}." + (" Restart listening for it to take effect."
+                                           if arg == "on" else ""))
+            return 0
+        st = sp.status()
+        print(json.dumps(st, indent=2))
         return 0
 
     if cmd == "listen":

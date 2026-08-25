@@ -183,8 +183,12 @@ else
   printf "  ...   building the voice environment (~700MB, this is the slow part)\n"
   mkdir -p "$TTS_HOME"
   run uv venv --python 3.13 "$TTS_HOME/.venv"
-  if VIRTUAL_ENV="$TTS_HOME/.venv" run uv pip install pocket-tts numpy; then
-    ok "Pocket TTS installed"
+  # resemblyzer rides along in this venv because it needs torch, which is
+  # already here. setuptools is pinned because 81+ drops pkg_resources, which
+  # webrtcvad (a resemblyzer dependency) still imports.
+  if VIRTUAL_ENV="$TTS_HOME/.venv" run uv pip install pocket-tts numpy \
+       resemblyzer "setuptools<81"; then
+    ok "Pocket TTS + speaker recognition installed"
   else
     bad "Pocket TTS install failed — see $LOG"
   fi
@@ -370,6 +374,7 @@ check(){ # label  command...
 check "voice service"  curl -fsS -m 8 http://127.0.0.1:8812/health
 check "speech-to-text" command -v whisper-cli
 check "speech model"   test -s "$CREA_HOME/var/models/ggml-base.en.bin"
+check "speaker id"     bash -c "curl -fsS -m 8 http://127.0.0.1:8812/health | grep -q speaker_id"
 check "brain"          command -v hermes
 check "integrations"   command -v n8n
 check "vault"          test -f "$CREA_HOME/vault/CREA.md"
@@ -391,6 +396,7 @@ ${G}${B}CREA is installed and running.${N}
     ${B}crea status${N}                 how every part is doing
     ${B}crea connect${N}                add an account you skipped
     ${B}crea card${N}                   import a plugged-in SD card
+    ${B}crea enrol${N}                  teach it your voice, so it answers only you
 
   Your job vault:  $CREA_HOME/vault
   Full log:        $LOG

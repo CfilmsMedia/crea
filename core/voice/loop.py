@@ -75,13 +75,19 @@ def answer(cfg, vault: Vault, question: str, speak: bool = True) -> str:
 def run(cfg, vault: Vault) -> None:
     """The always-on loop. Ctrl-C to stop."""
     from .wake import WakeError
+    from .speaker import Speaker
     stt = make_stt(cfg)
     tts = make_tts(cfg)
-    wake = make_wake(cfg, stt)
+    speaker = Speaker(cfg)
+    wake = make_wake(cfg, stt, speaker=speaker if speaker.enabled else None)
     brain = make_brain(cfg)
     phrase = cfg.get("identity.wake_phrase")
 
     print(f"[crea] listening for {phrase!r} — nothing leaves this machine until it fires")
+    if speaker.enabled:
+        st = speaker.status()
+        print(f"[crea] voice check on — {'enrolled' if st['enrolled'] else 'NOT ENROLLED, '
+              'answering anyone until you run: crea enrol'}", flush=True)
     while True:
         try:
             wake.wait()

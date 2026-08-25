@@ -147,7 +147,8 @@ class VadWhisper(WakeDetector):
     """Continuous stream, overlapping windows, local whisper. No deaf gaps."""
 
     def __init__(self, phrase: str, stt, window_s: float = 2.4,
-                 hop_s: float = 0.8, rms_gate: float | None = None):
+                 hop_s: float = 0.8, rms_gate: float | None = None,
+                 speaker=None):
         self.phrase = phrase.lower().strip()
         self.stt = stt
         self.window = int(window_s * SAMPLE_RATE)
@@ -157,6 +158,8 @@ class VadWhisper(WakeDetector):
         # both directions: too high in a quiet room and it never hears a normal
         # speaking voice; too low in a noisy one and every fan hits whisper.
         self.rms_gate = rms_gate
+        self.speaker = speaker     # optional voice-identity check
+        self.last_score = None
         self._gate = None          # cached after the first calibration
         self._gate_at = 0.0
         self.last_heard = ""
@@ -223,6 +226,7 @@ class VadWhisper(WakeDetector):
                 if rms(audio) < gate:
                     continue                       # silence never reaches whisper
                 path = write_wav(audio)
+                path_bytes = path.read_bytes()
                 try:
                     heard = self.stt.transcribe(path)
                 except Exception as e:
@@ -231,10 +235,21 @@ class VadWhisper(WakeDetector):
                 finally:
                     path.unlink(missing_ok=True)
                 self.last_heard = heard
-                if matches(heard, self.phrase):
-                    with lock:
-                        buf.clear()                # don't re-trigger on the same audio
-                    return
+                if not matches(heard, self.phrase):
+                    continue
+
+                # The phrase was said. Was it said by the person who owns this?
+                if self.speaker is not None:
+                    ok, score = self.speaker.verify(path_bytes)
+                    self.last_score = score
+                    if not ok:
+                        print(f"[crea] heard the phrase but not your voice "
+                              f"(match {score:.2f})", flush=True)
+                        continue
+
+                with lock:
+                    buf.clear()                    # don't re-trigger on the same audio
+                return
 
     def health(self) -> dict:
         return {"provider": "vad-whisper", "phrase": self.phrase,
@@ -278,11 +293,11 @@ def record_command(max_seconds: float = 9.0, silence_gate: float = 0.009,
     return write_wav(np.concatenate(chunks))
 
 
-def make_wake(cfg, stt) -> WakeDetector:
+def make_wake(cfg, stt, speaker=None) -> WakeDetector:
     provider = cfg.get("voice.wake.provider")
     if provider == "openwakeword":
         return OpenWakeWord(cfg.get("voice.wake.model_path"),
                             cfg.get("voice.wake.threshold", 0.6))
     if provider == "vad-whisper":
-        return VadWhisper(cfg.get("identity.wake_phrase"), stt)
+        return VadWhisper(cfg.get("identity.wake_phrase"), stt, speaker=speaker)
     raise WakeError(f"unknown wake provider: {provider}")
