@@ -124,8 +124,11 @@ if [[ -f "$CREA_HOME/bin/crea" && -d "$CREA_HOME/core" ]]; then
   fi
 else
   printf "  ...   downloading CREA\n"
-  if [[ -d "$CREA_HOME" ]] && [[ -n "$(ls -A "$CREA_HOME" 2>/dev/null | grep -v '^var$')" ]]; then
+  if [[ -d "$CREA_HOME" ]] && [[ -n "$(ls -A "$CREA_HOME" 2>/dev/null)" ]]; then
     # Non-empty target that isn't a CREA checkout: clone beside it, then merge in.
+    # This is the normal fresh-install path, not an edge case: the var/ scaffold
+    # is created at the top of this script, so $CREA_HOME is never empty by the
+    # time we get here and a direct clone into it would always fail.
     TMP="$(mktemp -d)"
     if run git clone --depth 1 -b "$CREA_BRANCH" "$CREA_REPO" "$TMP/crea"; then
       run rsync -a --exclude 'var/' --exclude 'crea.config.json' "$TMP/crea/" "$CREA_HOME/"
