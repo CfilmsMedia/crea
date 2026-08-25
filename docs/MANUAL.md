@@ -1,7 +1,7 @@
 # CREA — Build Manual
 
-**Cfilms Real Estate Adviser.** Prepared for Connell Saputra.
-Supersedes the plan of 17 August 2026.
+**Cfilms Real Estate Adviser.** Version 1.1 · 25 August 2026.
+Prepared for Connell Saputra. Supersedes the plan of 17 August 2026.
 
 > ### Every number in this document is a placeholder
 > The jobs, clients, addresses, dollar figures and dates throughout — Aisha
@@ -358,7 +358,29 @@ If something's wrong and you can't tell what: `crea status` reports what's
 actually working rather than what's supposed to be, including whether the Mac's
 clock disagrees with CREA's. Send me what it prints.
 
-## 15. Moving machines
+## 15. What's new in 1.1
+
+| New | What it means for you |
+|---|---|
+| **It can learn your voice** | CREA can answer only you rather than anyone who says its name. About a minute to set up, off by default — leave it off if an assistant or your editor should be able to ask it things too |
+| **26 voices, not one** | If the default grates, there are 25 others. All free, all on the machine |
+| **Setup opens each page for you** | No hunting through settings menus. It opens Acuity, Google and Apify at the right page and checks each key works before saving |
+| **It keeps the Mac awake** | An always-on assistant that sleeps isn't always on. Handled, without changing your own power settings |
+| **The clock is right year-round** | Sydney time, following daylight saving on its own, rather than trusting whatever the Mac was set to at first-time setup. A wrong clock would have fired the morning brief at the wrong hour and dated invoices a day out |
+| **CREA on your phone** | Section 13 — three ways, two free, and an honest answer on the paid one |
+| **When things go wrong** | Section 14 — the five that catch every setup like this |
+
+**Also fixed:** the wake word didn't work in 1.0. It does now, and it was tested
+with a real human voice rather than assumed — which is how the problem was
+found. Speech recognition kept hearing "Hey CREA" as "Paycray", so the name is
+given to it in advance now. Related: it's pronounced **kree-ah**.
+
+**1.0 → 1.1.** 1.0 was the working core: voice in, voice out, the job vault, the
+card pipeline. 1.1 is every remaining skill from your original plan, plus the
+things you only discover by running something on a machine that has to stay up
+for months.
+
+## 16. Moving machines
 
 Every setting specific to you lives in `crea.config.json`. Moving CREA to a
 different Mac is copying that one file across.
