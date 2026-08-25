@@ -86,6 +86,38 @@ recording is discarded once understood.
 | Wakes at the wrong times | Tuned to accept near-misses rather than miss you. Say the word and I'll tighten it |
 | Hears you but answers oddly | Expected early. It only knows the vault — connecting Acuity and Google makes answers real |
 
+### Making it answer only you
+
+Out of the box CREA answers anyone who says its name — the way a HomePod does.
+If you'd rather it only answered you:
+
+```
+crea enrol              # say the phrase a few times
+crea voice-check on     # now it only answers you
+```
+
+Enrolment takes about a minute. It asks you to say "Hey CREA" five times, and
+wants a bit of variety — closer, further away, mid-sentence — because that's far
+more reliable than five identical recordings. It tells you if one came out
+noticeably different, so a bad enrolment doesn't quietly make it flaky.
+
+Do it on the Mini, with the microphone you'll actually use. A voice measures
+differently through a different mic.
+
+Leave it off if you'd rather it answered anyone — handy if an assistant or your
+editor ever needs to ask it something. Off is the default.
+
+**It errs towards answering.** If the voice check can't run for any reason, CREA
+answers anyway rather than going silent.
+
+### 26 voices
+
+CREA's own voice is one of 26 built in, all free and on-device. If alba doesn't
+suit you, change `voice.tts.voice` in the settings file to any of: cosette,
+marius, javert, jean, anna, vera, fantine, charles, paul, eponine, azelma,
+george, mary, jane, michael, eve, giovanni, lola, juergen, rafael, estelle, and
+a few more. Cloning a specific person's voice needs the paid ElevenLabs path.
+
 ### You never have to use your voice
 
 Everything CREA does by voice it also does by typing, and the vault is plain
