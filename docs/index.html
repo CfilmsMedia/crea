@@ -1,0 +1,1051 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CREA Build Manual</title>
+<meta name="description" content="The complete CREA setup for Cfilms — what it does, what it costs, how to run it.">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="CREA Build Manual">
+<meta property="og:description" content="The complete CREA setup for Cfilms — what it does, what it costs, how to run it.">
+<style>*{margin:0}</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --ink:#10151C;
+  --ground:#EDF0F3;
+  --surface:#FFFFFF;
+  --surface-2:#F5F7F9;
+  --line:#D3DAE2;
+  --line-soft:#E3E8ED;
+  --text:#1A2029;
+  --muted:#5D6875;
+  --amber:#8A4E12;
+  --amber-bright:#B4661A;
+  --sky:#2F6A92;
+  --good:#2E7256;
+  --warn:#8A6410;
+  --idle:#6B7684;
+  --rail:#6E7A87;
+  --code-bg:#10151C;
+  --code-fg:#DDE5EE;
+  --shadow:0 1px 2px rgba(16,21,28,.05),0 8px 24px -12px rgba(16,21,28,.14);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ink:#E6EBF1;
+    --ground:#0D1219;
+    --surface:#141B24;
+    --surface-2:#1A222D;
+    --line:#2A3542;
+    --line-soft:#212B36;
+    --text:#DCE3EB;
+    --muted:#8D9AA9;
+    --amber:#E8A155;
+    --amber-bright:#F0AE68;
+    --sky:#6FA8CE;
+    --good:#5FBE93;
+    --warn:#D6A845;
+    --idle:#7A8797;
+    --rail:#5A6878;
+    --code-bg:#070A0F;
+    --code-fg:#D2DBE5;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E6EBF1;
+  --ground:#0D1219;
+  --surface:#141B24;
+  --surface-2:#1A222D;
+  --line:#2A3542;
+  --line-soft:#212B36;
+  --text:#DCE3EB;
+  --muted:#8D9AA9;
+  --amber:#E8A155;
+  --amber-bright:#F0AE68;
+  --sky:#6FA8CE;
+  --good:#5FBE93;
+  --warn:#D6A845;
+  --idle:#7A8797;
+  --rail:#5A6878;
+  --code-bg:#070A0F;
+  --code-fg:#D2DBE5;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--text);
+  font-family:"Newsreader",Georgia,"Times New Roman",serif;
+  font-size:17.5px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1040px;margin:0 auto;padding:0 28px 96px}
+
+/* ---------- masthead ---------- */
+.masthead{
+  padding:76px 0 40px;
+  border-bottom:1px solid var(--line);
+}
+.eyebrow{
+  font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  font-size:11.5px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--amber);
+  margin:0 0 20px;
+}
+h1{
+  font-family:"Archivo",system-ui,sans-serif;
+  font-weight:700;
+  font-size:clamp(46px,8vw,86px);
+  line-height:.94;
+  letter-spacing:-.03em;
+  margin:0 0 6px;
+  color:var(--ink);
+  text-wrap:balance;
+}
+.sub{
+  font-family:"Archivo",system-ui,sans-serif;
+  font-weight:500;
+  font-size:clamp(17px,2.4vw,22px);
+  letter-spacing:-.01em;
+  color:var(--muted);
+  margin:0 0 30px;
+}
+.standfirst{
+  font-size:20px;
+  line-height:1.55;
+  max-width:60ch;
+  color:var(--text);
+  margin:0 0 30px;
+}
+.meta{
+  display:flex;flex-wrap:wrap;gap:8px 28px;
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:12px;color:var(--muted);
+}
+.meta b{color:var(--text);font-weight:500}
+
+/* ---------- sections ---------- */
+section{padding-top:64px}
+h2{
+  font-family:"Archivo",system-ui,sans-serif;
+  font-weight:700;
+  font-size:clamp(27px,4vw,36px);
+  letter-spacing:-.022em;
+  line-height:1.12;
+  color:var(--ink);
+  margin:0 0 8px;
+  text-wrap:balance;
+}
+h3{
+  font-family:"Archivo",system-ui,sans-serif;
+  font-weight:600;
+  font-size:19px;
+  letter-spacing:-.012em;
+  color:var(--ink);
+  margin:34px 0 10px;
+}
+.deck{color:var(--muted);max-width:62ch;margin:0 0 26px;font-size:17px}
+p{max-width:66ch;margin:0 0 16px}
+a{color:var(--sky)}
+strong{font-weight:500;color:var(--ink)}
+
+.sec-num{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);display:block;margin-bottom:14px;
+}
+.sec-num i{font-style:normal;color:var(--amber)}
+
+/* ---------- status chips ---------- */
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  padding:3px 8px;border-radius:3px;white-space:nowrap;
+  border:1px solid currentColor;
+}
+.chip::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.c-run{color:var(--good)}
+.c-built{color:var(--warn)}
+.c-plan{color:var(--idle)}
+
+/* ---------- proven panel ---------- */
+.proven{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:6px;
+  box-shadow:var(--shadow);
+  padding:26px 28px;
+  margin:28px 0;
+}
+.proven-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:22px;margin-top:20px;
+}
+.stat .k{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--muted);display:block;margin-bottom:5px;
+}
+.stat .v{
+  font-family:"Archivo",system-ui,sans-serif;
+  font-weight:700;font-size:29px;letter-spacing:-.02em;
+  color:var(--ink);display:block;line-height:1.1;
+  font-variant-numeric:tabular-nums;
+}
+.stat .n{font-size:14px;color:var(--muted);display:block;margin-top:3px;line-height:1.4}
+
+/* ---------- phase rail ---------- */
+.phases{margin-top:28px;border-top:1px solid var(--line-soft)}
+.phase{
+  display:grid;
+  grid-template-columns:64px 1fr;
+  gap:0 22px;
+  padding:26px 0;
+  border-bottom:1px solid var(--line-soft);
+}
+.phase-n{
+  font-family:"Archivo",system-ui,sans-serif;
+  font-weight:700;font-size:30px;letter-spacing:-.03em;
+  color:var(--rail);line-height:1;
+  font-variant-numeric:tabular-nums;
+  padding-top:2px;
+}
+.phase.done .phase-n{color:var(--amber-bright)}
+.phase-h{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 14px;margin-bottom:7px;
+}
+.phase-h h4{
+  font-family:"Archivo",system-ui,sans-serif;
+  font-weight:600;font-size:19px;letter-spacing:-.012em;
+  color:var(--ink);margin:0;
+}
+.phase-time{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:11px;color:var(--muted);letter-spacing:.05em;
+}
+.phase p{margin:0 0 10px;font-size:16.5px}
+.needs{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:12px;color:var(--muted);line-height:1.75;
+}
+.needs b{color:var(--amber);font-weight:500}
+
+/* ---------- tables ---------- */
+.scroll{overflow-x:auto;margin:22px 0;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:660px;font-size:15px}
+th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+th{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--muted);font-weight:400;background:var(--surface-2);
+  border-bottom:1px solid var(--line);
+}
+tbody tr:last-child td{border-bottom:none}
+td code{font-size:12.5px}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+code{
+  font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  font-size:13.5px;
+  background:var(--surface-2);
+  border:1px solid var(--line-soft);
+  border-radius:3px;padding:1px 5px;
+  color:var(--ink);
+}
+pre{
+  background:var(--code-bg);
+  color:var(--code-fg);
+  border-radius:6px;
+  padding:18px 20px;
+  overflow-x:auto;
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:13px;line-height:1.7;
+  margin:18px 0;
+}
+pre{border:1px solid var(--code-bg)}
+pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
+pre .c{color:#7E8C9C}
+pre .f{color:#E8A155}
+
+/* ---------- callout ---------- */
+.note{
+  border-left:3px solid var(--amber);
+  background:var(--surface);
+  border-radius:0 6px 6px 0;
+  padding:20px 24px;
+  margin:26px 0;
+}
+.note h4{
+  font-family:"Archivo",system-ui,sans-serif;
+  font-weight:600;font-size:16px;margin:0 0 8px;color:var(--ink);
+  letter-spacing:-.01em;
+}
+.note p{margin:0 0 10px;font-size:16px}
+.note p:last-child{margin-bottom:0}
+
+ul{max-width:66ch;padding-left:22px;margin:0 0 16px}
+li{margin-bottom:7px}
+
+.layers{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));
+  gap:14px;margin:26px 0;
+}
+.layer{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:6px;padding:18px 20px;box-shadow:var(--shadow);
+}
+.layer .lk{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--amber);display:block;margin-bottom:8px;
+}
+.layer h4{
+  font-family:"Archivo",system-ui,sans-serif;font-weight:600;font-size:17px;
+  margin:0 0 6px;color:var(--ink);letter-spacing:-.01em;
+}
+.layer p{font-size:15px;margin:0;color:var(--muted);max-width:none}
+
+.foot{
+  margin-top:76px;padding-top:26px;border-top:1px solid var(--line);
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:12px;color:var(--muted);line-height:1.8;
+}
+
+@media (max-width:600px){
+  body{font-size:16.5px}
+  .wrap{padding:0 20px 64px}
+  .masthead{padding:48px 0 32px}
+  .phase{grid-template-columns:44px 1fr;gap:0 14px}
+  .phase-n{font-size:23px}
+  .proven{padding:20px}
+}
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Build manual &#183; version 1.1 &#183; 25 August 2026</p>
+  <h1>CREA</h1>
+  <p class="sub">Cfilms Real Estate Adviser &#8212; the complete setup</p>
+  <p class="standfirst">An always-on AI adviser that answers out loud, runs your booking pipeline, sorts your cards, and keeps the admin off your plate. This version supersedes the 17 August plan: the core is built and running, setup is a single command, and the monthly cost has come down a long way.</p>
+  <div class="note" style="margin:0 0 30px">
+    <h4>Every number in this document is a placeholder</h4>
+    <p>The jobs, clients, addresses, dollar figures and dates throughout &#8212; Aisha Rahman,
+    $7,170 outstanding, the Baulkham Hills shoot &#8212; are <strong>invented test data</strong>.
+    They exist so the system has something realistic to run against before your real
+    accounts are connected. None of it refers to a real client, a real shoot, or real money.</p>
+    <p>The only figures that are <strong>measured rather than invented</strong> are the
+    performance numbers in section 01 (speech speed, response time) and the costs in
+    section 08. Those were timed on real hardware.</p>
+  </div>
+
+  <div class="meta">
+    <span>For <b>Connell Saputra</b>, Cfilms</span>
+    <span>Prepared by <b>Tristan Ting</b></span>
+    <span>Status <b>Alpha running</b></span>
+  </div>
+</header>
+
+<section>
+  <span class="sec-num"><i>01</i> &#8212; What changed since the first plan</span>
+  <h2>The core is built, and it costs nothing to run</h2>
+  <p class="deck">The August plan estimated $25&#8211;100/month. Two decisions removed almost all of that.</p>
+
+  <p>The first plan assumed CREA would pay a per-word voice service and a per-token AI service. Neither is necessary. The voice runs <strong>entirely on your own machine</strong> &#8212; no account, no API key, no per-word cost &#8212; and the thinking is routed through a <strong>free model router</strong> that picks a no-cost model for each request. Both were benchmarked on real hardware, not estimated.</p>
+
+  <p>What that means practically: the numbers below are measured on a 2020 M1 MacBook with 8 GB of memory &#8212; deliberately the <em>worst</em> machine this will ever run on. Your Mac Mini will be faster.</p>
+
+  <div class="proven">
+    <span class="chip c-run">Measured, not estimated</span>
+    <div class="proven-grid">
+      <div class="stat">
+        <span class="k">Voice generation</span>
+        <span class="v">2.4&#215;</span>
+        <span class="n">Faster than real time. CREA finishes saying a sentence before you could read it.</span>
+      </div>
+      <div class="stat">
+        <span class="k">Thinking response</span>
+        <span class="v">8.6s</span>
+        <span class="n">From question asked to answer ready, on the free model tier.</span>
+      </div>
+      <div class="stat">
+        <span class="k">Voice cost</span>
+        <span class="v">$0</span>
+        <span class="n">Runs offline on the machine. No account required.</span>
+      </div>
+      <div class="stat">
+        <span class="k">Running cost</span>
+        <span class="v">$0&#8211;15</span>
+        <span class="n">Per month, versus the $25&#8211;100 originally quoted.</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>What is already working</h3>
+  <p>This is not a mockup. The following runs today and can be demonstrated:</p>
+  <ul>
+    <li>CREA speaks aloud in a natural voice, generated on-device &#8212; and says its own name properly. There are 26 voices to choose from, all free.</li>
+    <li>It wakes when you say &ldquo;Hey CREA&rdquo;, heard through a real microphone, with nothing transmitted until you do. It can learn your voice and answer only you.</li>
+    <li>It holds your entire job pipeline in an Obsidian vault and answers questions about it &#8212; <em>"what have I got on this week, and how much am I owed?"</em> returns the right shoot, the right client, and the right dollar figure, spoken back.</li>
+    <li>The job dashboard builds itself from the vault: pipeline counts, upcoming shoots, outstanding money, and anything stalled in editing.</li>
+  </ul>
+  <p>It is running against realistic <em>test</em> data &#8212; invented agents, invented addresses &#8212; because none of your real accounts are connected yet. Connecting them happens during setup.</p>
+
+  <div class="note">
+    <h4>See it and hear it</h4>
+    <p>There's a live mockup of all seven screens &#8212; Home, Jobs, Media, Clients, Calendar, Board and Personal &#8212; with CREA's actual voice in it. Tap the orb and it speaks. <a href="https://claude.ai/code/artifact/c36157f1-2dba-4de3-84b1-9f005d70653e">Open the interface mockup &#8594;</a></p>
+    <p>The voice is real. <strong>Every job, client and figure on those screens is placeholder test data.</strong> The layout, colour and motion are a proposal &#8212; tell me what you'd change before anything gets built properly.</p>
+  </div>
+</section>
+
+<section>
+  <span class="sec-num"><i>02</i> &#8212; How it fits together</span>
+  <h2>Four layers, one machine</h2>
+  <p class="deck">The split from the first plan holds. Here is what actually occupies each layer.</p>
+
+  <div class="layers">
+    <div class="layer">
+      <span class="lk">Layer 1</span>
+      <h4>The voice</h4>
+      <p>Listens for "Hey CREA", turns your speech into text and its reply into audio. All on-device &#8212; nothing is transmitted until the wake phrase fires.</p>
+    </div>
+    <div class="layer">
+      <span class="lk">Layer 2</span>
+      <h4>The brain</h4>
+      <p>Hermes decides what you meant and which skill to run. It also owns the schedule, so the daily briefing and overnight jobs use the same brain.</p>
+    </div>
+    <div class="layer">
+      <span class="lk">Layer 3</span>
+      <h4>The hands</h4>
+      <p>n8n does the plumbing to outside services &#8212; Acuity, Google, WhatsApp, Drive &#8212; as visual workflows rather than code you'd have to maintain.</p>
+    </div>
+    <div class="layer">
+      <span class="lk">Layer 4</span>
+      <h4>The memory</h4>
+      <p>An Obsidian vault of plain text files. Every job, client and shoot log is readable and editable by you directly, and portable if you ever drop CREA.</p>
+    </div>
+  </div>
+
+  <h3>Why n8n carries the integrations</h3>
+  <p>The original plan had every connection written as custom code. That's a maintenance burden nobody wants on someone else's machine. n8n replaces most of it with visual workflows, and it already ships a <strong>native Acuity Scheduling trigger</strong> &#8212; your bookings arrive as an event the moment they're made, with nothing custom to build. Google Calendar, Google Drive and WhatsApp have first-party nodes too, and there are several hundred published WhatsApp booking workflows to start from rather than from scratch.</p>
+
+  <h3>Why the model router matters</h3>
+  <p>OmniRoute sits between Hermes and the AI models. Hermes asks it for "the fastest good model" and OmniRoute picks one &#8212; preferring free providers, falling back automatically when one is rate-limited. You get resilience and a $0 bill without Hermes needing to know or care which model answered. If you later want the highest-quality model for a specific job, it's a one-line change, not a rebuild.</p>
+</section>
+
+<section>
+  <span class="sec-num"><i>03</i> &#8212; The stack</span>
+  <h2>Exactly what connects to what</h2>
+  <p class="deck">Every capability, and the specific mechanism behind it. "MCP" is a direct tool connection; "API" is a service account; "CLI" is a program on the machine.</p>
+
+  <div class="scroll">
+  <table>
+    <thead>
+      <tr><th>Capability</th><th>Mechanism</th><th>What you need</th><th class="num">Cost</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Orchestration &amp; scheduling</td><td>CLI &#8212; <code>hermes</code></td><td>Nothing. Installed locally.</td><td class="num">Free</td><td><span class="chip c-run">Running</span></td></tr>
+      <tr><td>AI thinking</td><td>API via OmniRoute</td><td>Nothing. Routes to free tiers.</td><td class="num">$0</td><td><span class="chip c-run">Running</span></td></tr>
+      <tr><td>Speech out</td><td>CLI &#8212; Pocket TTS</td><td>Nothing. Runs on the machine.</td><td class="num">$0</td><td><span class="chip c-run">Running</span></td></tr>
+      <tr><td>Speech in</td><td>CLI &#8212; whisper.cpp</td><td>Nothing. Runs on the machine.</td><td class="num">$0</td><td><span class="chip c-run">Running</span></td></tr>
+      <tr><td>Memory / job records</td><td>Files &#8212; Obsidian vault</td><td>Obsidian (free desktop app)</td><td class="num">Free</td><td><span class="chip c-run">Running</span></td></tr>
+      <tr><td>Wake word "Hey CREA"</td><td>CLI &#8212; on-device listener</td><td>Microphone + permission</td><td class="num">$0</td><td><span class="chip c-run">Running</span></td></tr>
+      <tr><td>Answers only your voice <em>(optional)</em></td><td>CLI &#8212; on-device voice print</td><td>A minute to enrol</td><td class="num">$0</td><td><span class="chip c-run">Built</span></td></tr>
+      <tr><td>Choice of 26 voices</td><td>Built in, on-device</td><td>Nothing</td><td class="num">$0</td><td><span class="chip c-run">Running</span></td></tr>
+      <tr><td>Booking sync</td><td>n8n Acuity Scheduling trigger</td><td>Your Acuity account + API key</td><td class="num">Included</td><td><span class="chip c-built">Built &#183; needs login</span></td></tr>
+      <tr><td>Calendar</td><td>n8n Google Calendar node</td><td>Google account authorisation</td><td class="num">Free</td><td><span class="chip c-built">Built &#183; needs login</span></td></tr>
+      <tr><td>Call transcription</td><td>CLI &#8212; whisper.cpp</td><td>Call recording app + consent flow</td><td class="num">$0</td><td><span class="chip c-built">Built &#183; needs login</span></td></tr>
+      <tr><td>WhatsApp messages</td><td>CLI &#8212; <code>hermes whatsapp</code></td><td>QR scan from your phone</td><td class="num">Free</td><td><span class="chip c-built">Built &#183; needs login</span></td></tr>
+      <tr><td>Drive upload</td><td>n8n Google Drive node</td><td>Google account authorisation</td><td class="num">Existing plan</td><td><span class="chip c-built">Built &#183; needs login</span></td></tr>
+      <tr><td>Photo/video editing</td><td>MCP &#8212; Higgsfield</td><td>Your existing Higgsfield account</td><td class="num">Existing plan</td><td><span class="chip c-built">Built &#183; needs login</span></td></tr>
+      <tr><td>Editor notification</td><td>n8n &#8594; WhatsApp</td><td>Narendra's number</td><td class="num">Free</td><td><span class="chip c-built">Built &#183; needs login</span></td></tr>
+      <tr><td>Invoicing</td><td>n8n + your accounting tool</td><td>Xero/QuickBooks credentials</td><td class="num">Existing plan</td><td><span class="chip c-run">Built</span></td></tr>
+      <tr><td>Booking agent &#8212; confirms &amp; chases</td><td>n8n &#8594; WhatsApp / SMS</td><td>Nothing beyond WhatsApp</td><td class="num">Free</td><td><span class="chip c-run">Built</span></td></tr>
+      <tr><td>Client check-in alerts</td><td>Reads your own job vault</td><td>Nothing</td><td class="num">Free</td><td><span class="chip c-run">Built</span></td></tr>
+      <tr><td>Lead tracking</td><td>Your existing Apify scraping</td><td>Your Apify account</td><td class="num">Existing plan</td><td><span class="chip c-run">Built</span></td></tr>
+      <tr><td>Content repurposing &#8594; Reels</td><td>CLI &#8212; ffmpeg + Higgsfield</td><td>Nothing new</td><td class="num">$0</td><td><span class="chip c-run">Built</span></td></tr>
+      <tr><td>Higher-quality voice <em>(optional)</em></td><td>API &#8212; ElevenLabs</td><td>Account, if you want it</td><td class="num">$5&#8211;22/mo</td><td><span class="chip c-plan">Optional</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <h4>Read the status column literally</h4>
+    <p><strong>Running</strong> means it was executed and verified while this document was being written. <strong>Built &#183; needs login</strong> means the skill is written and working, and starts doing its job the moment that account is connected during setup. Nothing here is a stub. <strong>Phase&nbsp;N</strong> means not started.</p>
+    <p>Nothing in this document is described as connected unless it genuinely is. That distinction is the difference between a plan you can trust and one you find out about later.</p>
+  </div>
+</section>
+
+<section>
+  <span class="sec-num"><i>04</i> &#8212; What it can do</span>
+  <h2>Nineteen skills, all written</h2>
+  <p class="deck">Every capability in your plan exists as working code. Fourteen of them run the moment it's installed, with no accounts connected at all.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Say this</th><th>And it</th><th>Needs</th></tr></thead>
+    <tbody>
+      <tr><td><em>"what's in the pipeline?"</em></td><td>Reads out every job by stage, and what you're owed</td><td>&#8212;</td></tr>
+      <tr><td><em>"mark Castle Hill as shot"</em></td><td>Moves a job along Booked &#8594; Shot &#8594; Editing &#8594; Invoiced &#8594; Paid</td><td>&#8212;</td></tr>
+      <tr><td><em>"the card's in"</em></td><td>Copies it, splits it into shoots on the time gaps, verifies every file</td><td>&#8212;</td></tr>
+      <tr><td><em>"is the card safe?"</em></td><td>Only says yes once Drive has confirmed every file</td><td>&#8212;</td></tr>
+      <tr><td><em>"who owes me?"</em></td><td>Drafts the invoices and names what's overdue</td><td>&#8212;</td></tr>
+      <tr><td><em>"I spent ninety-two on fuel"</em></td><td>Logs it, works out the category itself</td><td>&#8212;</td></tr>
+      <tr><td><em>"remind me about Mum's birthday on the 3rd"</em></td><td>Files it and brings it up on the day</td><td>&#8212;</td></tr>
+      <tr><td><em>"who haven't I spoken to?"</em></td><td>Flags clients going quiet, most valuable first</td><td>&#8212;</td></tr>
+      <tr><td><em>"what should I focus on?"</em></td><td>The morning board &#8212; three things, most urgent first</td><td>&#8212;</td></tr>
+      <tr><td><em>"cut me some Reels"</em></td><td>Slices vertical drafts out of the footage, with captions</td><td>&#8212;</td></tr>
+      <tr><td><em>"take notes on this lecture"</em></td><td>Slides in, revision notes out</td><td>Google, for Docs</td></tr>
+      <tr><td>Nothing &#8212; it just happens</td><td>Pulls new Acuity bookings into your calendar and tracker</td><td>Acuity</td></tr>
+      <tr><td>Nothing &#8212; it just happens</td><td>Reads booking requests out of WhatsApp</td><td>WhatsApp</td></tr>
+      <tr><td>Nothing &#8212; it just happens</td><td>Confirms tomorrow's shoots and chases replies</td><td>WhatsApp</td></tr>
+      <tr><td>Nothing &#8212; it just happens</td><td>Uploads shoots to Drive, hands to Higgsfield, tells your editor</td><td>Google</td></tr>
+      <tr><td>Nothing &#8212; it just happens</td><td>Flags agents worth approaching from your listing scrapes</td><td>Apify</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Ten of them also run <strong>on a schedule</strong>, without being asked: the briefing at 6:30, bookings checked every fifteen minutes, WhatsApp every ten, confirmations at 5pm, invoicing on Monday mornings, the board at 6.</p>
+
+  <div class="note">
+    <h4>It won't pretend</h4>
+    <p>A skill that needs an account you haven't connected says exactly that, and exactly how to connect it. It never half-runs and it never reports success for doing nothing. <code>crea skills</code> lists all nineteen and what each one is waiting on.</p>
+  </div>
+</section>
+
+<section>
+  <span class="sec-num"><i>05</i> &#8212; Where everything comes from</span>
+  <h2>The five accounts, and exactly where each one lives</h2>
+  <p class="deck">You don't need to find any of these yourself. During setup CREA opens the right page for you and checks the key works before saving it. This table is here so you know what's happening.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Account</th><th>Exactly where</th><th>What you copy</th><th>Unlocks</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Acuity</strong></td>
+        <td>Left sidebar &rarr; Business Settings &rarr; Integrations &rarr; API &rarr; view credentials</td>
+        <td>User ID (numeric) and API Key</td>
+        <td>Bookings arriving on their own</td>
+      </tr>
+      <tr>
+        <td><strong>Google</strong></td>
+        <td><a href="https://console.cloud.google.com/apis/credentials">console.cloud.google.com</a> &rarr; APIs &amp; Services &rarr; Credentials &rarr; Create credentials &rarr; OAuth client ID &rarr; Desktop app</td>
+        <td>Client ID and secret, then click Allow</td>
+        <td>Calendar, Drive uploads, uni notes into Docs</td>
+      </tr>
+      <tr>
+        <td><strong>WhatsApp</strong></td>
+        <td>On your phone: WhatsApp &rarr; Settings &rarr; Linked Devices &rarr; Link a Device</td>
+        <td>Nothing &#8212; you scan a QR code</td>
+        <td>Booking messages, confirmations, telling your editor</td>
+      </tr>
+      <tr>
+        <td><strong>Higgsfield</strong></td>
+        <td>Your account settings</td>
+        <td>API key</td>
+        <td>Shoots handed over for editing automatically</td>
+      </tr>
+      <tr>
+        <td><strong>Apify</strong></td>
+        <td><a href="https://console.apify.com/settings/integrations">console.apify.com</a> &rarr; Settings &rarr; Integrations</td>
+        <td>Personal API token</td>
+        <td>Lead tracking from your listing scrapes</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>What runs the whole thing underneath</h3>
+  <p>All of this is installed for you. It's listed so nothing about the system is a mystery, and so you could rebuild it without me if you ever wanted to.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Piece</th><th>What it is</th><th>Where it comes from</th></tr></thead>
+    <tbody>
+      <tr><td><code>hermes</code></td><td>Runs the skills and the schedule</td><td>Installed by the setup command</td></tr>
+      <tr><td><code>n8n</code></td><td>The visual connections to outside services</td><td>Installed by the setup command</td></tr>
+      <tr><td><code>whisper-cli</code></td><td>Turns your speech into text, on the machine</td><td>Homebrew, installed for you</td></tr>
+      <tr><td>Pocket TTS</td><td>CREA's voice, on the machine</td><td>Installed for you</td></tr>
+      <tr><td><code>ffmpeg</code>, <code>exiftool</code></td><td>Reels, and reading shot times off your files</td><td>Homebrew, installed for you</td></tr>
+      <tr><td>Obsidian</td><td>Where you read and edit your job vault</td><td>Installed for you</td></tr>
+      <tr><td><code>crea</code></td><td>The command that drives all of it</td><td><a href="https://github.com/skw-fuj/crea">github.com/skw-fuj/crea</a></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <h4>Where your keys are kept</h4>
+    <p>Every key you paste goes into a single locked file on your Mac that only your account can read. None of them are stored in the settings file, so that file stays safe to send to anyone. Nothing is uploaded, and I never see them.</p>
+  </div>
+</section>
+
+<section>
+  <span class="sec-num"><i>06</i> &#8212; The WhatsApp question</span>
+  <h2>Your number stays your number</h2>
+  <p class="deck">This was the biggest risk in the original plan, and it turns out to be avoidable.</p>
+
+  <p>The obvious way to read WhatsApp messages is Meta's official Business API. It's also a trap for you specifically. Connecting a number to that API means that number <strong>can no longer use the normal WhatsApp app</strong>, your local chat history is deleted, and incoming messages can be held for up to a month while the migration completes. For a business whose bookings arrive by WhatsApp, that's not a risk worth taking.</p>
+
+  <p>Hermes offers a second path. <code>hermes whatsapp</code> pairs by QR code, exactly like WhatsApp Web on a laptop. Your number stays a normal WhatsApp number, your history stays intact, and CREA reads incoming messages the same way a second device would.</p>
+
+  <div class="note">
+    <h4>The honest caveat</h4>
+    <p>This method uses an unofficial connection library. Meta's terms don't formally permit non-official clients, and there is a small risk of a number being restricted. It's widely used and rarely a problem in practice, but you should know about it before we switch it on &#8212; and if you'd rather not take it, we use a second SIM for CREA and leave your main number untouched.</p>
+  </div>
+</section>
+
+<section>
+  <span class="sec-num"><i>07</i> &#8212; Call recording</span>
+  <h2>The one part with a legal condition attached</h2>
+  <p class="deck">Worth getting right rather than fast. This is the only capability here with criminal exposure rather than commercial.</p>
+
+  <p>NSW requires <strong>all parties</strong> to a private conversation to consent to it being recorded. The Surveillance Devices Act 2007 has a narrow exception for protecting your own lawful interests &#8212; but "so I get the booking details right" is convenience, not protection, so that exception isn't available to us. The exception also fails outright where a recording is passed to people who weren't part of the conversation, which is what any transcription pipeline does.</p>
+
+  <p>That leaves consent, and consent is workable. In NSW consent can be implied &#8212; if a caller is clearly told at the start that the call is recorded and continues talking, that's generally accepted. So CREA is built to play a spoken disclosure before it retains a single second of audio:</p>
+
+  <pre><code><span class="c"># from crea.config.json</span>
+"require_disclosure": true,
+"disclosure_text": "Just so you know, I record calls
+                    so I get the booking details right.",
+"retain_audio": false,       <span class="c"># transcribe, then discard the recording</span>
+"abort_if_disclosure_fails": true</code></pre>
+
+  <p>Two deliberate choices there. <code>retain_audio: false</code> means the recording is transcribed for the booking details and then deleted &#8212; CREA keeps the date, time and address, not a library of your clients' voices. And <code>abort_if_disclosure_fails</code> means if the disclosure doesn't play for any reason, nothing is recorded at all.</p>
+
+  <div class="note">
+    <h4>Before this goes live</h4>
+    <p>I'm not a lawyer and this isn't legal advice. Every other capability here you can switch on at your own discretion; for this one, run the disclosure wording past someone qualified first. It's a cheap conversation and it makes the difference between a feature and a liability.</p>
+  </div>
+</section>
+
+<section>
+  <span class="sec-num"><i>08</i> &#8212; The card pipeline</span>
+  <h2>Plug in the card, go have a shower</h2>
+  <p class="deck">The flagship skill, unchanged in ambition from the first plan &#8212; with one safety change.</p>
+
+  <p>The sequence is exactly as originally specified: detect the card, copy everything off, split the files into separate shoots by looking for time gaps between shots, upload each shoot to Drive in its own named folder, push it into Higgsfield, and tell Narendra it's ready.</p>
+
+  <p>The one change is the last step. The original plan had CREA format the card automatically once everything was copied. It won't, and it ships with that disabled:</p>
+
+  <pre><code><span class="c"># from crea.config.json</span>
+"shoot_gap_minutes": 90,     <span class="c"># a longer break = a new shoot</span>
+"verify_copies": true,
+"format_card": <span class="f">"never"</span>       <span class="c"># never | ask | auto</span></code></pre>
+
+  <p>The reasoning is simple. Until Drive confirms the upload, that card is the only copy of a paid shoot in existence. Every other failure in this system costs you an inconvenience; this one costs you a job, a client, and a reputation. CREA will verify every copy and then <em>tell you</em> the card is safe to format. Once you've watched it get that right a dozen times, we can move it to <code>"ask"</code>, and eventually to <code>"auto"</code> if you want. That's your call to make later, not a default to inherit now.</p>
+</section>
+
+<section>
+  <span class="sec-num"><i>09</i> &#8212; Build order</span>
+  <h2>Eleven phases, in the order that pays off fastest</h2>
+  <p class="deck">Each phase sits on top of a working one. Nothing here requires the whole system to exist before it's useful.</p>
+
+  <div class="phases">
+
+    <div class="phase done">
+      <div class="phase-n">01</div>
+      <div>
+        <div class="phase-h"><h4>Core loop</h4><span class="chip c-run">Done</span><span class="phase-time">complete</span></div>
+        <p>Hermes, the Obsidian vault, and the AI brain, all talking to each other. Ask a question, get a correct spoken answer about your real pipeline.</p>
+        <div class="needs"><b>needs</b> nothing &#8212; already running</div>
+      </div>
+    </div>
+
+    <div class="phase done">
+      <div class="phase-n">02</div>
+      <div>
+        <div class="phase-h"><h4>"Hey CREA"</h4><span class="chip c-run">Done</span><span class="phase-time">complete</span></div>
+        <p>The wake phrase, running on the machine itself and <strong>verified from a real microphone</strong>. It listens continuously, calibrates itself to how quiet your room is, and tolerates the ways speech recognition mangles an invented name.</p>
+        <div class="needs"><b>needs</b> microphone permission, once</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-n">03</div>
+      <div>
+        <div class="phase-h"><h4>Acuity + calendar</h4><span class="phase-time">half a day</span></div>
+        <p>Bookings flow from Acuity into your calendar and the job tracker automatically. This alone kills the "what time did they say?" problem.</p>
+        <div class="needs"><b>needs</b> Acuity API key &#183; Google account authorisation &#183; n8n</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-n">04</div>
+      <div>
+        <div class="phase-h"><h4>Calls + WhatsApp</h4><span class="phase-time">2 days</span></div>
+        <p>Verbal and typed bookings get caught the same way Acuity ones do &#8212; a date, a time, an address and a client name lifted out and filed.</p>
+        <div class="needs"><b>needs</b> QR scan from your phone &#183; consent wording signed off</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-n">05</div>
+      <div>
+        <div class="phase-h"><h4>Card &#8594; Drive &#8594; Higgsfield</h4><span class="phase-time">2&#8211;4 days</span></div>
+        <p>The flagship. Highest daily time saving in the whole system, and the one worth testing on real shoots before trusting.</p>
+        <div class="needs"><b>needs</b> Google Drive &#183; Higgsfield account &#183; Narendra's number</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-n">06</div>
+      <div>
+        <div class="phase-h"><h4>Job dashboard + invoicing</h4><span class="phase-time">1&#8211;2 days</span></div>
+        <p>Booked &#8594; Shot &#8594; Editing &#8594; Invoiced &#8594; Paid, with reminders chasing anything overdue. The dashboard half already works; invoicing is the addition. This is also where the <strong>booking agent</strong> lands &#8212; CREA messaging a client to confirm a time, reschedule, or chase a reply on your behalf, the way you'd chase a restaurant booking.</p>
+        <div class="needs"><b>needs</b> your accounting tool's credentials &#183; whatsapp connected</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-n">07</div>
+      <div>
+        <div class="phase-h"><h4>Phone access</h4><span class="phase-time">2&#8211;3 days</span></div>
+        <p>Talk to CREA from the car. Starts as an iPhone Shortcut hitting the Mini directly &#8212; no app to build, works the week it's set up.</p>
+        <div class="needs"><b>needs</b> a secure tunnel to the Mini (Tailscale, free)</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-n">08</div>
+      <div>
+        <div class="phase-h"><h4>Personal layer</h4><span class="phase-time">1&#8211;2 days</span></div>
+        <p>The daily briefing spoken before you're up &#8212; today's shoots, what needs prep, what's owed. Plus smart reminders that catch things you mention in passing and actually follow up, and expense tracking that logs fuel, gear and uni costs as they land so tax time isn't archaeology.</p>
+        <div class="needs"><b>needs</b> phases 3 and 6 feeding it</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-n">09</div>
+      <div>
+        <div class="phase-h"><h4>Uni note-taking</h4><span class="phase-time">1 day</span></div>
+        <p>Upload lecture slides, get structured notes back in Google Docs. Built for exactly the case where you haven't got time to sit through the content yourself. Mostly ported rather than built.</p>
+        <div class="needs"><b>needs</b> google docs authorisation</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-n">10</div>
+      <div>
+        <div class="phase-h"><h4>Leads, check-ins, repurposing</h4><span class="phase-time">2&#8211;3 days</span></div>
+        <p>Three growth skills together. <strong>Lead tracking</strong> works with your existing Apify scraping to flag which agents are worth approaching each morning &#8212; recent listings, weak photography. <strong>Client check-ins</strong> flag a retainer client you haven't spoken to in a while, before the relationship goes cold. <strong>Content repurposing</strong> slices raw shoot and construction footage into Reels drafts with captions.</p>
+        <div class="needs"><b>needs</b> your apify account &#183; phases 3 and 6 for the history</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-n">11</div>
+      <div>
+        <div class="phase-h"><h4>The daily board</h4><span class="phase-time">2&#8211;3 days</span></div>
+        <p>The strategic layer &#8212; a standing group of agents reviewing the business each morning and surfacing leads, gaps and cold clients unprompted. Deliberately last: it's only as good as the data the earlier phases feed it.</p>
+        <div class="needs"><b>needs</b> everything above running for a few weeks first</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <span class="sec-num"><i>10</i> &#8212; Money and time</span>
+  <h2>What this actually costs</h2>
+
+  <div class="scroll">
+  <table>
+    <thead>
+      <tr><th>Item</th><th class="num">First plan</th><th class="num">This plan</th><th>Why it changed</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Hardware, one-off</td><td class="num">$550&#8211;1,300</td><td class="num">$550&#8211;1,300</td><td>Unchanged. Get 16 GB of memory, not 8 &#8212; this is the one spec that matters.</td></tr>
+      <tr><td>Voice</td><td class="num">$5&#8211;22/mo</td><td class="num">$0</td><td>Runs on the machine instead of a service.</td></tr>
+      <tr><td>AI model</td><td class="num">$20&#8211;60/mo</td><td class="num">$0</td><td>Routed to free tiers automatically.</td></tr>
+      <tr><td>Call transcription</td><td class="num">$0&#8211;15/mo</td><td class="num">$0</td><td>Runs on the machine.</td></tr>
+      <tr><td>Everything else</td><td class="num">&#8212;</td><td class="num">$0</td><td>Obsidian, n8n and Hermes are all free and open-source.</td></tr>
+      <tr><td><strong>Monthly total</strong></td><td class="num">$25&#8211;100</td><td class="num"><strong>$0&#8211;15</strong></td><td>The range only exists if you choose to upgrade the voice.</td></tr>
+      <tr><td>Build time</td><td class="num">4&#8211;8 weeks</td><td class="num">3&#8211;6 weeks</td><td>Phase 1 is done; n8n removes most custom integration work.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>One caveat on the hardware. The base Mac Mini is the right machine, but <strong>memory is the specification that decides whether this works</strong>. The alpha was benchmarked on an 8 GB machine, and 8 GB is genuinely not enough to hold the voice model and everything else at once. 16 GB is the floor. It's usually a couple of hundred dollars and it's the difference between CREA being instant and CREA being frustrating.</p>
+</section>
+
+<section>
+  <span class="sec-num"><i>11</i> &#8212; Setup</span>
+  <h2>You plug it in and run one line</h2>
+  <p class="deck">There is no list of things to download. The installer does all of it.</p>
+
+  <p>Take the Mac Mini out of the box, plug it in, and go through Apple&rsquo;s normal first-time setup. Then open the <strong>Terminal</strong> app (press <code>&#8984;&nbsp;Space</code>, type &ldquo;terminal&rdquo;, hit Enter) and paste this one line:</p>
+
+  <pre><code>curl -fsSL https://raw.githubusercontent.com/skw-fuj/crea/main/install.sh | bash</code></pre>
+
+  <p>Then walk away for about twenty minutes. It handles the lot:</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>It installs</th><th>Which gives you</th></tr></thead>
+    <tbody>
+      <tr><td>Homebrew, Node, uv, ffmpeg, ExifTool</td><td>The groundwork everything else sits on</td></tr>
+      <tr><td>CREA itself, from GitHub</td><td>The assistant. Re-running the line updates it.</td></tr>
+      <tr><td>whisper.cpp + the speech model</td><td>CREA hearing you, on-device</td></tr>
+      <tr><td>Pocket TTS + its voice model</td><td>CREA talking back, on-device</td></tr>
+      <tr><td>Hermes, pointed at the free model router</td><td>The thinking, at no cost</td></tr>
+      <tr><td>n8n</td><td>The connections to Acuity, Google and WhatsApp</td></tr>
+      <tr><td>Obsidian + your job vault</td><td>The memory, readable by you directly</td></tr>
+      <tr><td>Background services</td><td>CREA starting itself on boot, forever</td></tr>
+      <tr><td>The <code>crea</code> command</td><td>Everything controllable in one word</td></tr>
+      <tr><td>This manual, in the install</td><td>A copy lives at <code>~/crea/docs/MANUAL.md</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Near the end it stops and asks about three accounts &#8212; WhatsApp, Acuity, and Google. Each one is a yes/no, each one is optional, and each one can be done later with <code>crea connect</code>. WhatsApp shows you a QR code to scan with your phone, exactly like linking WhatsApp Web. Acuity asks you to paste a key. Google opens a browser window and you click Allow.</p>
+
+  <p>Say no to all three and CREA still installs and still talks to you &#8212; you just won't have bookings flowing in yet.</p>
+
+  <h3>If something goes wrong</h3>
+  <p>It won't fail silently. Every step reports whether it actually did something, was already done, or failed &#8212; and at the end it re-checks all five core components rather than assuming they came up. If anything is broken it tells you exactly what, writes a log, and asks you to send it to me. It's also safe to run again as many times as you like; anything already installed is left alone.</p>
+
+  <h3>What happens the moment it finishes</h3>
+  <p>CREA starts talking. It's already listening for its name, and it restarts itself whenever the Mini reboots &#8212; you never start it manually. The last thing the installer prints is the short list of things worth trying first:</p>
+
+  <pre><code><span class="c"># say this out loud</span>
+"Hey CREA &#8212; what have I got on this week?"
+
+<span class="c"># or type it</span>
+crea ask <span class="f">"how much am I owed?"</span>
+crea status                 <span class="c"># is everything healthy?</span>
+crea connect                <span class="c"># add an account you skipped</span></code></pre>
+
+  <p>Open the Obsidian app and you'll find your job vault sitting there &#8212; every shoot, client and note as a plain document you can read and edit yourself. Change something there and CREA knows about it immediately.</p>
+
+  <div class="note">
+    <h4>Moving machines later</h4>
+    <p>Every setting specific to you &#8212; your name, your folders, your keys, your preferences &#8212; lives in a single settings file. Moving CREA to a different Mac is copying that one file across. Nothing gets reinstalled or reconfigured by hand.</p>
+  </div>
+</section>
+
+<section>
+  <span class="sec-num"><i>12</i> &#8212; Talking to it</span>
+  <h2>How to actually use your voice</h2>
+  <p class="deck">The installer sets all of this up. This is what you need to know to use it.</p>
+
+  <h3>It's pronounced <em>KREE-ah</em></h3>
+  <p>Not "cray". This matters more than it sounds like it should &#8212; the speech recognition is
+  tuned for that pronunciation, and CREA says its own name that way too. Say it "cray" and it
+  will usually still catch you, but "kree-ah" is what it's listening for.</p>
+
+  <h3>macOS will ask for the microphone</h3>
+  <p>The first time CREA listens, macOS pops up a box asking to use the microphone.
+  <strong>Say yes.</strong> If you miss it or hit Don't Allow, CREA sits there hearing nothing
+  forever &#8212; it is the single most common reason a setup like this looks broken when it isn't.
+  You can fix it later under <strong>System Settings &#8594; Privacy &amp; Security &#8594;
+  Microphone</strong>.</p>
+
+  <h3>Just talk</h3>
+  <pre><code>"Hey CREA, what have I got on today?"
+"Hey CREA, how much am I owed?"
+"Hey CREA, mark the Castle Hill job as shot."</code></pre>
+  <p>Say the name, wait for the short "Yep?", then say what you want. It listens continuously
+  and everything stays on the machine &#8212; no audio goes anywhere until you have said its name,
+  and the recording is thrown away once it has understood you.</p>
+
+  <h3>If it doesn't hear you</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>What's happening</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td>No response at all</td><td>Run <code>crea status</code>. It reports honestly which part is down rather than guessing.</td></tr>
+      <tr><td>Never wakes up</td><td>Check the microphone permission above. Then check the input device is the one you're speaking into &#8212; a connected iPhone or a headset can quietly steal it.</td></tr>
+      <tr><td>Wakes at the wrong times</td><td>It is deliberately tuned to accept near-misses rather than miss you. Tell me and I'll tighten it.</td></tr>
+      <tr><td>Hears you but answers oddly</td><td>Expected early on. It only knows what's in the vault &#8212; connecting Acuity and Google is what makes the answers real.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Making it answer only you</h3>
+  <p>Out of the box CREA answers anyone who says its name &#8212; the way a HomePod does. If you'd
+  rather it only answered you, it can learn your voice:</p>
+  <pre><code>crea enrol              <span class="c"># say the phrase a few times</span>
+crea voice-check on     <span class="c"># now it only answers you</span></code></pre>
+  <p>Enrolment takes about a minute. It asks you to say &ldquo;Hey CREA&rdquo; five times, and
+  it wants a bit of variety &mdash; closer, further away, mid-sentence &mdash; because that
+  makes it far more reliable than five identical recordings. It tells you if one of them came
+  out noticeably different, so a bad enrolment doesn't quietly make it flaky.</p>
+  <p>Do it on the Mini itself, with the microphone you'll actually use. A voice sounds
+  measurably different through a different mic, so a print recorded elsewhere works less well.</p>
+  <p>If you'd rather it just answered anyone &mdash; handy if your editor or an assistant
+  ever needs to ask it something &mdash; leave it off. That's the default.</p>
+
+  <div class="note">
+    <h4>It errs towards answering</h4>
+    <p>If the voice check can't run for any reason, CREA answers anyway rather than going
+    silent. An assistant that stops responding because a background service fell over is worse
+    than one that occasionally answers someone else.</p>
+  </div>
+
+  <h3>You never have to use your voice</h3>
+  <p>Everything CREA does by voice it also does by typing, and the job vault is plain documents
+  you can open and edit in Obsidian yourself. Voice is the convenient path, not the only one.</p>
+</section>
+
+<section>
+  <span class="sec-num"><i>13</i> &#8212; CREA on your phone</span>
+  <h2>Three ways, two of them free</h2>
+  <p class="deck">You're out shooting most of the day, so this matters more than it looks. Don't decide on day one &#8212; use it for a fortnight first, then pick the one that matches what you actually reach for.</p>
+
+  <h3>1. Let CREA message you &nbsp;<span class="chip c-run">Free</span></h3>
+  <p>Once WhatsApp is connected, CREA can message you &#8212; the morning brief, tomorrow's shoots, a nudge when a job has been sitting in editing too long. It comes to your normal WhatsApp. No app, no subscription, nothing to set up beyond the connection you've already made.</p>
+  <p>For <em>"what's my next job and where"</em>, this covers most of it. Start here.</p>
+
+  <h3>2. Talk to it from the car &nbsp;<span class="chip c-run">Free</span></h3>
+  <p>An iPhone Shortcut that reaches the Mini at home, so you can ask CREA something with your hands on the wheel and hear the answer back. This is phase 7 in the build order.</p>
+  <p>It uses a private network between your phone and the Mini rather than opening the Mini up to the internet. Nothing is exposed publicly, and there's no port forwarding on your router. That distinction matters: an always-on machine with an open door on a home connection is how people get compromised.</p>
+
+  <h3>3. The whole vault, on your phone &nbsp;<span class="chip c-built">$4&ndash;5/month</span></h3>
+  <p>Obsidian Sync puts the actual job vault on your iPhone &#8212; every shoot, client and note, readable and editable. Change something on the train and CREA picks it up.</p>
+  <p>Worth being straight: $4/month billed yearly, $5 monthly, on a system otherwise running at $0&ndash;15. That's a real percentage increase even if it's small money. Students get 40% off.</p>
+
+  <div class="note">
+    <h4>Why not just use iCloud, which is free?</h4>
+    <p>Because iCloud <strong>removes files from your Mac</strong> when it decides they're not being used, leaving a placeholder that downloads on demand. That's invisible when a person opens a note. It is not invisible to CREA, which reads the vault automatically every fifteen minutes &#8212; an emptied-out job note is a job CREA can't see.</p>
+    <p>This isn't theoretical. While building this, two files in an iCloud folder showed as completely empty until they were manually pulled back down.</p>
+    <p>Obsidian Sync keeps a full copy on every device and never empties one out. For a folder that a background program reads on a schedule, that's the difference that matters &#8212; more than the version history you're nominally paying for.</p>
+  </div>
+
+  <h3>What I'd do</h3>
+  <p>Run it for two weeks on WhatsApp alone. If you find yourself wanting to <em>read and edit</em> the vault on your phone rather than just get answers, that's when Sync earns its money. If you only ever want answers, you never need it.</p>
+</section>
+
+<section>
+  <span class="sec-num"><i>14</i> &#8212; When things go wrong</span>
+  <h2>The five things most likely to bite</h2>
+  <p class="deck">None of these are exotic. They're the ones that catch every always-on setup, so they're handled or flagged rather than left for you to discover.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>If this happens</th><th>What's going on</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>CREA stops answering overnight</td>
+        <td>The Mac went to sleep. Handled &#8212; CREA keeps it awake by itself, without changing your power settings.</td>
+        <td>Nothing. If it does happen, <code>crea status</code> will say.</td>
+      </tr>
+      <tr>
+        <td>Power cut, or you restart the Mini</td>
+        <td>Everything restarts on its own. You never launch anything.</td>
+        <td>Nothing. Give it a minute after boot.</td>
+      </tr>
+      <tr>
+        <td>Internet drops</td>
+        <td>Voice and the job vault keep working &#8212; they're on the machine. Bookings, Drive and WhatsApp pause and catch up when you're back.</td>
+        <td>Nothing. Nothing is lost.</td>
+      </tr>
+      <tr>
+        <td>An account stops working</td>
+        <td>A key expired or was revoked. CREA won't guess or half-run &#8212; the skills needing it say exactly what's wrong.</td>
+        <td><code>crea status</code>, then <code>crea connect</code> for that one.</td>
+      </tr>
+      <tr>
+        <td>WhatsApp unlinks itself</td>
+        <td>Linked devices drop off after a long idle period. Normal, not a fault.</td>
+        <td><code>crea connect whatsapp</code> and scan again.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>The one that would actually hurt</h3>
+  <p>Losing a shoot. It's why CREA verifies every file copied off a card, and why it will <strong>never</strong> format one. It tells you the card is safe and leaves the decision with you. Until Drive confirms every file, that card is the only copy of a paid job in existence &#8212; every other failure here costs you an inconvenience, that one costs you a client.</p>
+
+  <div class="note">
+    <h4>If something's wrong and you can't tell what</h4>
+    <p>Run <code>crea status</code>. It reports what's actually working rather than what's supposed to be, including whether the Mac's clock disagrees with CREA's. Send me what it prints and I'll know where to look.</p>
+  </div>
+</section>
+
+<section>
+  <span class="sec-num"><i>15</i> &#8212; What&#8217;s new</span>
+  <h2>Version 1.1</h2>
+  <p class="deck">Everything below arrived after the first version of this document. Nothing was removed, and nothing you&#8217;ve already read has changed underneath you.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>New in 1.1</th><th>What it means for you</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>It can learn your voice</strong></td>
+        <td>CREA can answer only you, rather than anyone who says its name. About a minute to set up, and off by default &#8212; leave it off if you&#8217;d rather an assistant or your editor could ask it things too. See section 12.</td>
+      </tr>
+      <tr>
+        <td><strong>26 voices, not one</strong></td>
+        <td>If the default voice grates, there are 25 others built in. All free, all on the machine.</td>
+      </tr>
+      <tr>
+        <td><strong>Setup opens each page for you</strong></td>
+        <td>You no longer hunt through settings menus. It opens Acuity, Google and Apify in your browser at the right page, and checks each key actually works before saving it.</td>
+      </tr>
+      <tr>
+        <td><strong>It keeps the Mac awake</strong></td>
+        <td>An always-on assistant that goes to sleep isn&#8217;t always on. CREA now prevents that itself, without changing your own power settings.</td>
+      </tr>
+      <tr>
+        <td><strong>The clock is correct year-round</strong></td>
+        <td>Everything runs on Sydney time and follows daylight saving on its own, rather than trusting whatever the Mac was set to during first-time setup. A wrong clock would have fired your morning brief at the wrong hour and dated invoices a day out.</td>
+      </tr>
+      <tr>
+        <td><strong>CREA on your phone</strong></td>
+        <td>Section 13 &#8212; three ways, two of them free, and an honest answer on whether the paid one is worth it.</td>
+      </tr>
+      <tr>
+        <td><strong>When things go wrong</strong></td>
+        <td>Section 14 &#8212; the five things that catch every setup like this, what&#8217;s already handled, and the one that would actually hurt.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Also fixed</h3>
+  <p>The wake word didn&#8217;t work in version 1.0. It does now, and it was tested with a real human voice rather than assumed &#8212; which is how the problem was found. Speech recognition kept hearing &#8220;Hey CREA&#8221; as &#8220;Paycray&#8221;, so the name is now given to it in advance. Related: it&#8217;s pronounced <strong>kree-ah</strong>.</p>
+
+  <div class="note">
+    <h4>Version 1.0 &#8594; 1.1</h4>
+    <p>1.0 was the working core: voice in, voice out, the job vault, and the card pipeline. 1.1 is every remaining skill from your original plan, plus the things you only discover by actually running something on a machine that has to stay up for months.</p>
+  </div>
+</section>
+
+<section>
+  <span class="sec-num"><i>16</i> &#8212; Next</span>
+  <h2>Three things, then we start</h2>
+
+  <ul>
+    <li><strong>Order the Mac Mini &#8212; 16 GB.</strong> Everything waits on this, and it's the one spec that matters. Refurbished M1 is fine if it's 16 GB; a new base M4 is the safer buy.</li>
+    <li><strong>Look at the interface mockup and listen to the voice.</strong> Tell me what you'd change &#8212; colour, layout, what's on the first screen, whether the voice suits you. Now is the cheap time to change any of it.</li>
+    <li><strong>Decide on WhatsApp</strong> &#8212; your existing number by QR, or a second SIM for CREA. Section 04 has what you need to choose.</li>
+  </ul>
+
+  <p>That's it. The Acuity key and the Google login happen during the install itself, so there's nothing to gather in advance. If you want calls included in Phase 4, get the disclosure wording in section 05 checked by someone qualified &#8212; WhatsApp extraction can go ahead without it.</p>
+</section>
+
+<div class="foot">
+  CREA &#8212; Cfilms Real Estate Adviser &#183; build manual v2 &#183; 25 August 2026<br>
+  Supersedes the plan of 17 August 2026. Performance figures measured on Apple M1 / 8 GB.<br>
+  Status labels reflect what was verified at time of writing, not what is intended.
+</div>
+
+</div>
+
+</body>
+</html>
