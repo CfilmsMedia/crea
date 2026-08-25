@@ -164,8 +164,8 @@ class VadWhisper(WakeDetector):
     # Speech at a normal distance sits around 0.02-0.10 RMS. A gate above this
     # ceiling can never be crossed, so a noisy calibration must not be allowed
     # to set one — that deafens CREA for the whole session.
-    GATE_FLOOR = 0.0035
-    GATE_CEIL = 0.020
+    GATE_FLOOR = 0.0030
+    GATE_CEIL = 0.010
 
     def _calibrate_passive(self, buf, lock) -> float:
         """Estimate the room's noise floor, robust to transient noise.
@@ -184,7 +184,10 @@ class VadWhisper(WakeDetector):
             if sample.size:
                 floors.append(rms(sample[-int(0.3 * SAMPLE_RATE):]))
         floor = min(floors) if floors else 0.0
-        gate = min(max(floor * 3.0, self.GATE_FLOOR), self.GATE_CEIL)
+        # Deliberately permissive. A false wake is cheap - CREA says "Yep?"
+        # and hears nothing. A missed wake is the failure users actually
+        # notice, so bias towards listening and let the matcher reject.
+        gate = min(max(floor * 2.0, self.GATE_FLOOR), self.GATE_CEIL)
         print(f"[crea] noise floor {floor:.5f} -> gate {gate:.5f}", flush=True)
         return gate
 

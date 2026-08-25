@@ -34,7 +34,22 @@ def vault_context(vault: Vault, limit: int = 6) -> str:
         lines.append("Upcoming shoots:")
         for j in upcoming:
             d = datetime.fromisoformat(j["shoot_at"])
-            lines.append(f"- {d:%a %d %b %-I:%M%p}: {j['_title']} for {j['client']} at {j['address']}")
+            lines.append(f"- {d:%a %d %b %-I:%M%p}: {j['_title']} for {j['client']} "
+                         f"at {j['address']}, ${j.get('fee') or 0:,.0f}")
+
+    # Anything stalled mid-pipeline is the most common thing to be asked about
+    # ("what's stuck?", "what haven't I invoiced?"). Without it the brain has to
+    # answer "I don't know" about data that is sitting right there in the vault.
+    for status in ("Shot", "Editing", "Invoiced"):
+        rows = [j for j in jobs if j.get("status") == status]
+        if not rows:
+            continue
+        total = sum(j.get("fee") or 0 for j in rows)
+        lines.append(f"Jobs in {status} ({len(rows)}, ${total:,.0f}):")
+        for j in sorted(rows, key=lambda r: r.get("shoot_at", "")):
+            d = datetime.fromisoformat(j["shoot_at"])
+            lines.append(f"- {j['_title']} for {j['client']}, shot {d:%d %b}, "
+                         f"${j.get('fee') or 0:,.0f}")
     return "\n".join(lines)
 
 

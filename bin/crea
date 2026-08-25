@@ -93,16 +93,37 @@ def main(argv: list[str]) -> int:
         return 0
 
     if cmd == "voice":
-        tts_dir = Path.home() / ".claude/odyssey/tts"
-        if argv[2:3] == ["start"]:
-            subprocess.Popen(
-                [str(tts_dir / ".venv/bin/python"), str(tts_dir / "server.py")],
-                stdout=open(cfg.path("paths.logs") / "voice.log", "a"),
-                stderr=subprocess.STDOUT)
-            print("voice daemon starting")
-        elif argv[2:3] == ["stop"]:
-            subprocess.run(["pkill", "-f", "tts/server.py"])
-            print("voice daemon stopped")
+        # CREA ships its own voice service. This used to point at a developer
+        # machine's install, which simply does not exist on a fresh Mac.
+        tts_dir = Path(cfg.get("paths.root")) / "tts"
+        server = tts_dir / "server.py"
+        py = tts_dir / ".venv/bin/python"
+        action = argv[2:3] or ["status"]
+
+        if action == ["start"]:
+            if not server.exists():
+                print(f"voice service missing at {server} — re-run the installer")
+                return 1
+            if not py.exists():
+                print(f"voice environment missing at {py} — re-run the installer")
+                return 1
+            import urllib.request
+            try:                       # never start a second copy
+                urllib.request.urlopen(cfg.get("voice.tts.endpoint").rsplit("/", 1)[0]
+                                       + "/health", timeout=3)
+                print("voice daemon already running")
+                return 0
+            except Exception:
+                pass
+            subprocess.Popen([str(py), str(server)],
+                             stdout=open(cfg.path("paths.logs") / "voice.log", "a"),
+                             stderr=subprocess.STDOUT)
+            print("voice daemon starting (about 20s to warm up)")
+        elif action == ["stop"]:
+            # Match the absolute path this command launches, not a fragment that
+            # silently matches nothing.
+            n = subprocess.run(["pkill", "-f", str(server)]).returncode
+            print("voice daemon stopped" if n == 0 else "no voice daemon was running")
         else:
             print("crea voice start|stop")
         return 0
