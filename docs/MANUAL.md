@@ -304,7 +304,61 @@ call to make later, not a default to inherit now.
 
 Full system, built steadily: **3–6 weeks part-time.**
 
-## 13. Moving machines
+## 13. CREA on your phone
+
+Three ways, two of them free. Don't decide on day one — use it a fortnight first.
+
+**1. Let CREA message you — free.** Once WhatsApp is connected it can message
+you: the morning brief, tomorrow's shoots, a nudge when a job's been sitting in
+editing. No app, no subscription. For "what's my next job and where", this covers
+most of it. Start here.
+
+**2. Talk to it from the car — free.** An iPhone Shortcut reaching the Mini over
+a private network (phase 7). Nothing is exposed publicly and there's no port
+forwarding — an always-on machine with an open door on a home connection is how
+people get compromised.
+
+**3. The whole vault on your phone — $4–5/month.** Obsidian Sync puts the job
+vault on your iPhone, readable and editable. $4/mo billed yearly, $5 monthly, on
+a system otherwise running at $0–15. Students get 40% off.
+
+### Why not free iCloud?
+
+Because iCloud **removes files from your Mac** when it decides they're cold,
+leaving a placeholder that downloads on demand. Invisible when a person opens a
+note. Not invisible to CREA, which reads the vault automatically every fifteen
+minutes — an emptied-out job note is a job CREA can't see.
+
+Not theoretical: while building this, two files in an iCloud folder showed as
+completely empty until manually pulled back down.
+
+Obsidian Sync keeps a full copy on every device and never empties one out. For a
+folder a background program reads on a schedule, that matters more than the
+version history you're nominally paying for.
+
+**What I'd do:** run two weeks on WhatsApp alone. If you find yourself wanting to
+read and edit the vault on your phone rather than just get answers, that's when
+Sync earns its money.
+
+## 14. When things go wrong
+
+| If this happens | What's going on | What to do |
+|---|---|---|
+| Stops answering overnight | The Mac slept. Handled — CREA keeps it awake itself, without changing your power settings | Nothing |
+| Power cut / restart | Everything restarts on its own | Nothing. Give it a minute |
+| Internet drops | Voice and the vault keep working (they're local). Bookings, Drive and WhatsApp catch up after | Nothing is lost |
+| An account stops working | A key expired. Skills needing it say exactly what's wrong rather than half-running | `crea status`, then `crea connect <name>` |
+| WhatsApp unlinks | Linked devices drop off after long idle. Normal | `crea connect whatsapp`, scan again |
+
+**The one that would actually hurt** is losing a shoot. That's why CREA verifies
+every file copied off a card and will **never** format one — it tells you the card
+is safe and leaves the decision with you.
+
+If something's wrong and you can't tell what: `crea status` reports what's
+actually working rather than what's supposed to be, including whether the Mac's
+clock disagrees with CREA's. Send me what it prints.
+
+## 15. Moving machines
 
 Every setting specific to you lives in `crea.config.json`. Moving CREA to a
 different Mac is copying that one file across.

@@ -317,6 +317,13 @@ PLIST
 plist voice "$TTS_HOME/.venv/bin/python" "$TTS_HOME/server.py"
 plist agent "$CREA_HOME/.venv/bin/python" "$CREA_HOME/bin/crea" listen
 
+# An always-on assistant that goes to sleep is not always on. caffeinate holds
+# off idle and display sleep without needing an admin password, and without
+# touching the machine's own power settings — so nothing here is left behind if
+# CREA is ever removed. The Mac still sleeps if the lid is closed or you tell it
+# to; this only stops it drifting off on its own.
+plist awake /usr/bin/caffeinate -dis
+
 # ---------------------------------------------------------------- 12. shortcut
 
 step "Command shortcut"
@@ -378,6 +385,7 @@ check "speaker id"     bash -c "curl -fsS -m 8 http://127.0.0.1:8812/health | gr
 check "brain"          command -v hermes
 check "integrations"   command -v n8n
 check "vault"          test -f "$CREA_HOME/vault/CREA.md"
+check "stays awake"    pgrep -f "caffeinate -dis"
 check "skills"         "$CREA_HOME/bin/crea" skills
 
 READY=$("$CREA_HOME/bin/crea" skills 2>/dev/null | grep -c "^  ok " || echo 0)
