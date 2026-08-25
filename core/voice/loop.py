@@ -14,7 +14,7 @@ from pathlib import Path
 from ..brain import make_brain
 from ..vault import Vault
 from .providers import make_stt, make_tts
-from .wake import make_wake, record_command
+from .wake import make_wake
 
 
 def vault_context(vault: Vault, limit: int = 6) -> str:
@@ -94,13 +94,16 @@ def run(cfg, vault: Vault) -> None:
             print("[crea] wake")
             play(tts.speak("Yep?"))
 
-            cmd_wav = record_command()
+            cmd_wav = wake.capture_command()
             try:
                 said = stt.transcribe(cmd_wav)
             finally:
                 cmd_wav.unlink(missing_ok=True)
 
             if not said.strip():
+                # Never fail silently — the user is standing there waiting.
+                print("[crea] didn't catch that", flush=True)
+                play(tts.speak("Sorry, I didn't catch that."))
                 continue
             print(f"[crea] heard: {said}")
 
@@ -110,6 +113,7 @@ def run(cfg, vault: Vault) -> None:
             play(tts.speak(reply))
         except KeyboardInterrupt:
             print("\n[crea] stopped")
+            wake.close()
             return
         except WakeError as e:
             # A misconfigured or missing wake model will not fix itself. Spinning

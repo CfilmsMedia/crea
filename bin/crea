@@ -231,6 +231,101 @@ def main(argv: list[str]) -> int:
 
         n = sp.min_samples
         phrase = cfg.get("identity.wake_phrase")
+        spoken = bool(kwargs_spoken) if (kwargs_spoken := ("--spoken" in rest)) else False
+
+        if spoken:
+            # Enrolment you can do without looking at a screen: CREA says what
+            # it wants, a tone marks each recording.
+            #
+            # ONE persistent input stream for the whole run. Opening and closing
+            # a stream per sample deadlocks CoreAudio on macOS — the IO thread
+            # blocks in AudioUnitGetProperty while the main thread waits on a
+            # semaphore, and nothing ever returns. Same rolling-buffer pattern
+            # the wake loop uses, which is proven on this machine.
+            import threading as _th
+            import time as _t
+            import wave as _w, io as _io
+            from collections import deque
+            import numpy as np
+            import sounddevice as sd
+            from core.voice.loop import play
+            from core.voice.providers import make_tts
+            from core.voice.wake import write_wav, rms, SAMPLE_RATE
+
+            tts = make_tts(cfg)
+            TAKE = 3.2                       # seconds captured per sample
+            buf = deque(maxlen=int(TAKE * SAMPLE_RATE))
+            lock = _th.Lock()
+
+            def _cb(indata, frames, t, status):
+                with lock:
+                    buf.extend(indata[:, 0])
+
+            def beep(freq=880, ms=170):
+                t = np.linspace(0, ms / 1000, int(SAMPLE_RATE * ms / 1000), False)
+                tone = (np.sin(freq * 2 * np.pi * t) * 0.3 * 32767).astype("int16")
+                f = int(SAMPLE_RATE * 0.02)
+                tone[:f] = (tone[:f] * np.linspace(0, 1, f)).astype("int16")
+                tone[-f:] = (tone[-f:] * np.linspace(1, 0, f)).astype("int16")
+                wp = write_wav(tone)
+                subprocess.run(["afplay", str(wp)], check=False)
+                wp.unlink(missing_ok=True)
+
+            def grab() -> bytes | None:
+                with lock:
+                    a = np.array(buf, dtype="int16")
+                if a.size < int(1.0 * SAMPLE_RATE) or rms(a) < 0.004:
+                    return None
+                wp = write_wav(a)
+                data = wp.read_bytes()
+                wp.unlink(missing_ok=True)
+                return data
+
+            samples = []
+            with sd.InputStream(samplerate=SAMPLE_RATE, channels=1, dtype="int16",
+                                blocksize=int(0.1 * SAMPLE_RATE), callback=_cb):
+                play(tts.speak(f"I am going to learn your voice. When you hear the tone, "
+                               f"say {phrase}, normally. I will ask {n} times."))
+                for i in range(1, n + 1):
+                    hint = {2: "again, a little further away",
+                            3: "again, closer this time",
+                            4: "again, as if you were mid sentence",
+                            5: "last one, normally"}.get(i)
+                    if hint:
+                        play(tts.speak(hint))
+                    _t.sleep(0.25)
+                    with lock:
+                        buf.clear()          # never re-use the previous take
+                    beep()
+                    _t.sleep(TAKE)
+                    data = grab()
+                    if data is None:
+                        print(f"  sample {i}: nothing heard", flush=True)
+                        play(tts.speak("I did not catch that."))
+                        continue
+                    with _w.open(_io.BytesIO(data)) as w:
+                        secs = w.getnframes() / w.getframerate()
+                    samples.append(data)
+                    print(f"  sample {i}: {secs:.1f}s captured", flush=True)
+
+            if len(samples) < 2:
+                play(tts.speak("I did not get enough of that. We can try again later."))
+                print("not enough usable samples")
+                return 1
+            try:
+                out = sp.enrol(samples)
+            except Exception as e:
+                play(tts.speak("Something went wrong saving your voice."))
+                print(f"enrol failed: {e}")
+                return 1
+            good = out["weakest"] >= 0.75
+            play(tts.speak(
+                f"Got it. I have your voice from {out['samples']} recordings."
+                + ("" if good else " One of those sounded different from the rest. "
+                                   "If I start missing you, do this again somewhere quieter.")))
+            print(json.dumps(out, indent=2))
+            return 0
+
         print(f"\nTeaching CREA your voice.\n")
         print(f"It'll ask you to say \"{phrase}\" {n} times.")
         print("Say it normally, the way you actually would. Vary it a bit —")

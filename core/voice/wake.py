@@ -194,21 +194,80 @@ class VadWhisper(WakeDetector):
         print(f"[crea] noise floor {floor:.5f} -> gate {gate:.5f}", flush=True)
         return gate
 
+    # One microphone stream for the whole session. Opening and closing streams
+    # around each interaction deadlocks CoreAudio on macOS: the IO thread blocks
+    # in AudioUnitGetProperty while the main thread waits on a semaphore, and
+    # neither ever returns. Keeping one stream open also removes the start-up
+    # latency between hearing the phrase and hearing the command.
+    def _ensure_stream(self):
+        import sounddevice as sd
+        if getattr(self, "_stream", None) is not None:
+            return self._buf, self._lock
+        self._buf = deque(maxlen=self.window)
+        self._lock = threading.Lock()
+
+        def cb(indata, frames, t, status):
+            with self._lock:
+                self._buf.extend(indata[:, 0])
+
+        self._stream = sd.InputStream(
+            samplerate=SAMPLE_RATE, channels=1, dtype="int16",
+            blocksize=int(0.1 * SAMPLE_RATE), callback=cb)
+        self._stream.start()
+        return self._buf, self._lock
+
+    def close(self) -> None:
+        st = getattr(self, "_stream", None)
+        if st is not None:
+            st.stop()
+            st.close()
+            self._stream = None
+
+    def capture_command(self, max_seconds: float = 9.0, silence_run: float = 1.1,
+                        gate: float = 0.006) -> Path:
+        """Record what was said after the wake phrase, on the SAME stream."""
+        import numpy as np
+        import sounddevice as sd
+        buf, lock = self._ensure_stream()
+        with lock:
+            buf.clear()
+        collected, quiet, elapsed, step = [], 0.0, 0.0, 0.25
+        started = False          # has the speaker actually begun?
+        lead_in = 3.0            # how long to wait for them to start
+        while elapsed < max_seconds:
+            sd.sleep(int(step * 1000))
+            with lock:
+                chunk = np.array(buf, dtype="int16")
+                buf.clear()
+            elapsed += step
+            if not chunk.size:
+                continue
+            collected.append(chunk)
+            loud = rms(chunk) >= gate
+            if loud:
+                started = True
+                quiet = 0.0
+            elif started:
+                # Only count silence once they have begun. Otherwise the natural
+                # pause between "Yep?" and the question ends the recording before
+                # a word is said.
+                quiet += step
+            elif elapsed >= lead_in:
+                break            # they never started; stop waiting
+            if started and quiet >= silence_run:
+                break
+        audio = np.concatenate(collected) if collected else np.zeros(1, dtype="int16")
+        return write_wav(audio)
+
     def wait(self) -> None:
         import numpy as np
         import sounddevice as sd
 
-        buf: deque = deque(maxlen=self.window)
-        lock = threading.Lock()
-
-        def cb(indata, frames, t, status):
-            with lock:
-                buf.extend(indata[:, 0])
+        buf, lock = self._ensure_stream()
 
         import time as _t
         gate = self.rms_gate
-        with sd.InputStream(samplerate=SAMPLE_RATE, channels=1, dtype="int16",
-                            blocksize=int(0.1 * SAMPLE_RATE), callback=cb):
+        if True:
             if gate is None:
                 # Calibration costs ~2s, so cache it rather than paying that
                 # after every single interaction. Refresh occasionally so the
