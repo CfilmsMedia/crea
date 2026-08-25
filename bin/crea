@@ -253,7 +253,7 @@ def main(argv: list[str]) -> int:
             from core.voice.wake import write_wav, rms, SAMPLE_RATE
 
             tts = make_tts(cfg)
-            TAKE = 3.2                       # seconds captured per sample
+            TAKE = 4.5                       # seconds captured per sample
             buf = deque(maxlen=int(TAKE * SAMPLE_RATE))
             lock = _th.Lock()
 
@@ -284,15 +284,20 @@ def main(argv: list[str]) -> int:
             samples = []
             with sd.InputStream(samplerate=SAMPLE_RATE, channels=1, dtype="int16",
                                 blocksize=int(0.1 * SAMPLE_RATE), callback=_cb):
-                play(tts.speak(f"I am going to learn your voice. When you hear the tone, "
-                               f"say {phrase}, normally. I will ask {n} times."))
+                play(tts.speak(
+                    "I am going to learn your voice. When you hear the tone, say a "
+                    "full sentence, normally — anything at all, just keep talking "
+                    f"until I stop you. I will ask {n} times."))
                 for i in range(1, n + 1):
-                    hint = {2: "again, a little further away",
-                            3: "again, closer this time",
-                            4: "again, as if you were mid sentence",
-                            5: "last one, normally"}.get(i)
-                    if hint:
-                        play(tts.speak(hint))
+                    # Full sentences, not the bare wake phrase: identity is checked
+                    # on the command the speaker gives, which is several seconds of
+                    # speech. Two seconds of "Hey CREA" is measurably too little.
+                    hint = {1: "Tell me what you did yesterday.",
+                            2: "Again, a little further from the microphone.",
+                            3: "Again, closer this time.",
+                            4: "Again — tell me about a shoot you have coming up.",
+                            5: "Last one. Anything at all, normally."}.get(i)
+                    play(tts.speak(hint or "Once more."))
                     _t.sleep(0.25)
                     with lock:
                         buf.clear()          # never re-use the previous take

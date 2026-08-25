@@ -96,6 +96,18 @@ def run(cfg, vault: Vault) -> None:
 
             cmd_wav = wake.capture_command()
             try:
+                # Identity is checked on the command, not the wake phrase: this
+                # is several seconds of speech rather than two, and it is also
+                # the thing that actually matters — never ACT on a stranger.
+                if speaker.enabled:
+                    ok, score = speaker.verify(cmd_wav.read_bytes())
+                    if not ok:
+                        print(f"[crea] not your voice (match {score:.2f}) — ignoring",
+                              flush=True)
+                        play(tts.speak("Sorry, I only take instructions from you."))
+                        continue
+                    if score is not None:
+                        print(f"[crea] voice matched ({score:.2f})", flush=True)
                 said = stt.transcribe(cmd_wav)
             finally:
                 cmd_wav.unlink(missing_ok=True)

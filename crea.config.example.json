@@ -87,7 +87,8 @@
         "threshold": 0.75,
         "min_samples": 5,
         "_note": "OFF by default. When on, CREA only answers the enrolled voice \u2014 Siri's 'Recognise My Voice' rather than a HomePod that answers the room. Run 'crea enrol' first, then 'crea voice-check on'.",
-        "_threshold_note": "Measured on this machine, twice. From clean audio: same speaker 0.83-0.84, different voice 0.55-0.59. Through the microphone the gap COMPRESSES \u2014 same 0.876, different 0.699 \u2014 because room acoustics are shared by both. 0.70 would have left 0.0004 of margin against the stranger, which is not a boundary. 0.75 keeps the owner comfortably above (+0.09 acoustic, +0.09 clean) and the stranger clearly below (-0.05). Enrol through the same microphone you'll actually use."
+        "_threshold_note": "Measured on this machine, twice. From clean audio: same speaker 0.83-0.84, different voice 0.55-0.59. Through the microphone the gap COMPRESSES \u2014 same 0.876, different 0.699 \u2014 because room acoustics are shared by both. 0.70 would have left 0.0004 of margin against the stranger, which is not a boundary. 0.75 keeps the owner comfortably above (+0.09 acoustic, +0.09 clean) and the stranger clearly below (-0.05). Enrol through the same microphone you'll actually use.",
+        "_measured": "Verified end to end. Enrolment on SENTENCES (not the bare wake phrase): consistency 0.94. Live: enrolled speaker 0.94 ACCEPT, different voice 0.68 REJECT. Identity is checked on the COMMAND, not the wake phrase \u2014 a 2s phrase carries too little voiced audio (phrase-only enrolment self-scored just 0.87, genuine repeats landed 0.65)."
       }
     }
   },

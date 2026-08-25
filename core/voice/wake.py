@@ -297,14 +297,12 @@ class VadWhisper(WakeDetector):
                 if not matches(heard, self.phrase):
                     continue
 
-                # The phrase was said. Was it said by the person who owns this?
-                if self.speaker is not None:
-                    ok, score = self.speaker.verify(path_bytes)
-                    self.last_score = score
-                    if not ok:
-                        print(f"[crea] heard the phrase but not your voice "
-                              f"(match {score:.2f})", flush=True)
-                        continue
+                # Speaker identity is NOT decided here. A two-second wake phrase
+                # carries too little voiced audio for a reliable embedding —
+                # measured: enrolment on the phrase alone self-scores only 0.87
+                # with a weakest sample of 0.76, and genuine repeats land around
+                # 0.65. The command that follows is several seconds of speech,
+                # which is where the check actually works. See loop.run().
 
                 with lock:
                     buf.clear()                    # don't re-trigger on the same audio
