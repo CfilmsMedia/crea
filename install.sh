@@ -294,6 +294,14 @@ fi
 
 step "Background services"
 
+# launchd does NOT inherit your shell's PATH. A service started this way gets
+# a bare /usr/bin:/bin:/usr/sbin:/sbin, which contains no Homebrew — so the
+# agent could not find whisper-cli and every wake died with "whisper.cpp not
+# installed", despite it being installed. ffmpeg and exiftool (the card
+# pipeline) and hermes have the same problem. Pin the PATH explicitly.
+SVC_PATH="$(dirname "$(command -v brew 2>/dev/null || echo /opt/homebrew/bin/brew)")"
+SVC_PATH="$SVC_PATH:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
 plist(){ # name  program-args...
   local name="$1"; shift
   local f="$HOME/Library/LaunchAgents/com.cfilms.crea.$name.plist"
@@ -306,6 +314,9 @@ plist(){ # name  program-args...
   <key>Label</key><string>com.cfilms.crea.$name</string>
   <key>ProgramArguments</key><array>
 $args  </array>
+  <key>EnvironmentVariables</key><dict>
+    <key>PATH</key><string>$SVC_PATH</string>
+  </dict>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
   <key>ProcessType</key><string>Interactive</string>
