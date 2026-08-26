@@ -124,11 +124,8 @@ if [[ -f "$CREA_HOME/bin/crea" && -d "$CREA_HOME/core" ]]; then
   fi
 else
   printf "  ...   downloading CREA\n"
-  if [[ -d "$CREA_HOME" ]] && [[ -n "$(ls -A "$CREA_HOME" 2>/dev/null)" ]]; then
+  if [[ -d "$CREA_HOME" ]] && [[ -n "$(ls -A "$CREA_HOME" 2>/dev/null | grep -v '^var$')" ]]; then
     # Non-empty target that isn't a CREA checkout: clone beside it, then merge in.
-    # This is the normal fresh-install path, not an edge case: the var/ scaffold
-    # is created at the top of this script, so $CREA_HOME is never empty by the
-    # time we get here and a direct clone into it would always fail.
     TMP="$(mktemp -d)"
     if run git clone --depth 1 -b "$CREA_BRANCH" "$CREA_REPO" "$TMP/crea"; then
       run rsync -a --exclude 'var/' --exclude 'crea.config.json' "$TMP/crea/" "$CREA_HOME/"
@@ -247,11 +244,26 @@ setenv(){ # key value
     printf '%s=%s\n' "$1" "$2" >> "$HOME/.hermes/.env"
   fi
 }
-setenv LM_BASE_URL "$ROUTER"
-setenv LM_API_KEY  "local"
-run hermes config set provider lmstudio
-run hermes config set model    auto/best-fast
-ok "Hermes routed to $ROUTER"
+# Re-running the installer must not silently repoint a working brain. This
+# script promises "safe to re-run", and it does leave crea.config.json alone —
+# but the brain actually lives in Hermes' own config, and rewriting that
+# unprompted moved a machine off a configured OpenRouter setup and back onto a
+# router that was not running. The two configs then disagreed, and only kept
+# working because CREA passes -m/--provider explicitly on every call.
+#
+# So: configure the default only when nothing is configured yet.
+CURRENT_MODEL="$(hermes config get model 2>/dev/null \
+                 | sed -n 's/.*default:[[:space:]]*\([^[:space:]]*\).*/\1/p' | head -1)"
+[[ -z "$CURRENT_MODEL" ]] && CURRENT_MODEL="$(hermes config get model 2>/dev/null | tr -d '[:space:]')"
+if [[ -z "$CURRENT_MODEL" || "$CURRENT_MODEL" == "auto/best-fast" ]]; then
+  setenv LM_BASE_URL "$ROUTER"
+  setenv LM_API_KEY  "local"
+  run hermes config set provider lmstudio
+  run hermes config set model    auto/best-fast
+  ok "Hermes routed to $ROUTER"
+else
+  skip "Hermes brain (already configured: $CURRENT_MODEL)"
+fi
 
 if curl -fsS -m 5 "$ROUTER/models" >/dev/null 2>&1; then
   ok "Router reachable"
