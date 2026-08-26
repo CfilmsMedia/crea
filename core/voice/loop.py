@@ -6,6 +6,7 @@ writing into the vault that supplies `context` here.
 """
 from __future__ import annotations
 
+import os
 import subprocess
 import tempfile
 import time
@@ -55,7 +56,13 @@ def vault_context(vault: Vault, limit: int = 6) -> str:
 
 
 def play(audio: bytes) -> None:
-    p = Path(tempfile.mkstemp(suffix=".wav")[1])
+    # mkstemp returns (fd, path) and the fd is already open. Taking [1] and
+    # dropping the fd leaks one descriptor per call — the always-on loop hits
+    # the per-process limit after a few hundred wakes and then every reply
+    # fails with "Too many open files".
+    fd, name = tempfile.mkstemp(suffix=".wav")
+    os.close(fd)
+    p = Path(name)
     p.write_bytes(audio)
     try:
         subprocess.run(["afplay", str(p)], check=False)
