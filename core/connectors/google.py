@@ -110,12 +110,21 @@ class Google(Connector):
         ids += [c["id"] for c in items if not c.get("primary") and c.get("id")]
         return ids or ["primary"]
 
-    def events(self, days: int = 14) -> list[dict]:
+    def calendar_id_by_name(self, name: str) -> str | None:
+        """Find a calendar by its display name, case-insensitively."""
+        url = "https://www.googleapis.com/calendar/v3/users/me/calendarList"
+        for c in self._json(self._req(url)).get("items", []):
+            if (c.get("summary") or "").strip().lower() == name.strip().lower():
+                return c.get("id")
+        return None
+
+    def events(self, days: int = 14, calendar_id: str | None = None,
+               days_back: int = 0) -> list[dict]:
         from datetime import datetime, timedelta, timezone
 
         # calendar_id may be a single id, a list of ids, or null. Null now means
         # "every calendar I can see" rather than "primary only".
-        cal = self.conf.get("calendar_id")
+        cal = calendar_id or self.conf.get("calendar_id")
         if not cal:
             try:
                 cals = self.calendars()
@@ -128,7 +137,7 @@ class Google(Connector):
 
         now = datetime.now(timezone.utc)
         q = urllib.parse.urlencode({
-            "timeMin": now.isoformat(),
+            "timeMin": (now - timedelta(days=days_back)).isoformat(),
             "timeMax": (now + timedelta(days=days)).isoformat(),
             "singleEvents": "true", "orderBy": "startTime", "maxResults": 100,
         })
