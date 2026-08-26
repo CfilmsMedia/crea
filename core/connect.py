@@ -245,22 +245,35 @@ def connect_whatsapp(cfg) -> bool:
 
 
 def connect_higgsfield(cfg) -> bool:
-    head("Higgsfield", "Paste the API key from your Higgsfield account settings.")
-    open_page("https://higgsfield.ai/", "Higgsfield")
-    key = ask("API key", secret=True)
-    if not key:
-        print("  skipped.")
+    # Higgsfield retired its bearer-token API. There is no key to paste: the
+    # product ships a CLI that authenticates over OAuth and stores the token
+    # itself, so all CREA can do is check the CLI is installed, signed in and
+    # pointed at a workspace — and say exactly which of those is missing.
+    head("Higgsfield", "Higgsfield uses a CLI and a browser sign-in, not an API key.")
+    from .connectors.higgsfield import Higgsfield, SETUP
+    h = Higgsfield(cfg)
+
+    if not h._bin():
+        print("  The Higgsfield CLI isn't installed yet.\n")
+        print(f"  {SETUP}\n")
+        print("  Run those three, then: crea connect higgsfield")
         return False
-    set_env(cfg, "HIGGSFIELD_API_KEY", key)
-    from .connectors.higgsfield import Higgsfield
+
     try:
-        Higgsfield(cfg).verify()
-        print("  connected.")
-        return True
+        info = h.verify()
     except Exception as e:
-        print(f"  saved, but the test call failed: {e}")
-        print("  CREA will still upload to Drive; it just won't hand off to Higgsfield.")
+        print(f"  the CLI is installed but not usable yet: {e}\n")
+        print(f"  {SETUP}")
         return False
+
+    print(f"  connected — {info['account']}")
+    try:
+        print("\n  Workspaces:")
+        for line in h.workspaces().splitlines():
+            print(f"    {line}")
+    except Exception:
+        pass
+    return True
 
 
 def connect_apify(cfg) -> bool:
